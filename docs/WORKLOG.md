@@ -2,6 +2,41 @@
 
 This file is append-only. Add new entries at the top of the log section without rewriting prior entries.
 
+## 2026-09-30 — Storefront reconciliation: Parts C & D (Guest Flow Audit & Polish)
+
+- Agent: Antigravity
+- Branch: `feature/storefront-reconcile`
+
+### Part C — Guest Flow Audit Results
+
+1. **Home page (`/`): PASS** — Hero search dispatches destination, date, and traveller parameters to `/tours`; category cards link with `?category=`; destination bento grid links to `/tours?destination=` with Battambang active; featured tours render `TourCard` with direct detail page links; testimonials carousel renders approved traveller reviews with autoplay, pause-on-hover, keyboard navigation, and touch swipe.
+2. **Search & Tour Listing (`/tours`): PASS** — All filters (destination, category, dual-slider price bounds, day/multi duration, 4.0/4.5+ star ratings) and sort options (popular, price asc/desc, rating) verified. Normalized filter matching in `filters.js` and `ToursPage.jsx` so hyphenated slugs (`siem-reap`), natural spaced names (`Siem Reap`), and mixed casing all resolve flawlessly. Active filter chips are individually removable and Clear all resets the query. Empty state displays with a clear "Clear filters" recovery action.
+3. **Tour Detail (`/tours/:id`): PASS** — Photo gallery with responsive aspect ratio and full-featured Lightbox (ArrowLeft/ArrowRight, Escape key, touch swipe). All four content tabs (Overview, Itinerary with expandable day accordions, Included/Excluded checklist, Reviews with rating breakdown chart) render smoothly. Real-time departure picker respects seat availability (sold-out departures disabled, color-coded seat tones). Adults and children counters calculate total price live and enforce capacity limits. Related tours render with shared `TourCard`.
+4. **Book Now logged out hop: PASS** — Clicking "Book now" while logged out captures the selected departure date, adult count, and child count into query parameters and forwards the guest to `/login?redirect=/booking/:tourId?date=...&adults=...&children=...` via `authPath()`.
+5. **Customer Login redirect: PASS** — Signing in with `customer@tourtrip.com` / `Customer@123` succeeds, verifies credentials with the mock service, shows a welcome toast, and safely navigates back to the booking stub with all query parameters intact.
+6. **Customer Registration redirect: PASS** — Registering a new mock user validates with Zod, automatically creates the session, signs the user in, shows a welcome toast, and safely redirects back to `/booking/:tourId?date=...&adults=...&children=...`.
+7. **Continue Browsing pages: PASS** —
+   - `/destinations`: Grid of all 6 Cambodian provinces with dynamically computed tour counts from the shared catalogue (Siem Reap: 4, Kampot: 2, Phnom Penh: 1, Sihanoukville: 1, Kep: 1, Battambang: 1); clicking a card links to `/tours?destination=`.
+   - `/gallery`: Filter chips by destination and travel style with live counts, interactive hover cards, empty state, and shared Lightbox.
+   - `/reviews`: Aggregate rating score, interactive 5★-1★ distribution bars with click-to-filter, star/destination/tour filters, sorting, verified traveller cards, and empty state.
+8. **Wishlist smoke test: PASS** — Heart button on `TourCard` toggles saved status; header count badge updates live across tabs and pages; guests persist in `localStorage` under `wishlist` and fold into customer account on sign in; `/wishlist` displays saved tours with an empty state linking back to `/tours`.
+
+### Part D — Return-Visit Polish & Audits
+
+- **D1: Recently Viewed Strip** — Updated `recentlyViewed.js` to persist under `recentlyViewed` in `localStorage` (while maintaining compatibility with `tourtrip.recentlyViewed`). Renders on Home below Featured Tours with a responsive 3-column desktop grid showing up to 6 viewed tours without arbitrary truncation.
+- **D2: Site-Wide Empty State Audit** — Audited all 10 pages and views using `EmptyState` (`ToursPage`, `TourDetailPage`, `WishlistPage`, `DestinationsPage`, `GalleryPage`, `ReviewsPage`, `AboutPage`, `FaqPage`, `NotFoundPage`, `CustomerBookingsPage`). Confirmed 0 dead-end states: every single empty state provides clear action buttons or links to recover.
+- **D3: Below-the-Fold Lazy Loading Audit** — Verified all below-fold images use `loading="lazy"` and `decoding="async"` across `TourCard`, `HomeSections`, `DestinationsPage`, `GalleryPage`, `AboutPage`, `CustomerBookingsPage`, and `BookingStubPage`.
+- **D4: Responsive Check at 375px and 1280px** — Confirmed no horizontal scrollbar or element overflow at 375px (mobile) and 1280px (desktop). Navigation, drawers, popovers, and sticky booking cards adapt smoothly.
+
+### Verification
+
+- `npm run lint`: Completed with 0 errors across 269 files.
+- `npm run build`: Completed with 0 errors in ~3.2s.
+
+### Next Steps (Phase 7c)
+
+Phase 7c will implement the production booking flow (`/booking/:tourId` review & confirm, payment processing simulation, booking confirmation voucher), "My Bookings" management, and booking cancellation, building upon the reconciled customer auth and state architecture.
+
 ## 2026-09-30 — Storefront reconciliation, Part B
 
 - Audited the wishlist implementation already present in the squashed snapshot: the shared `TourCard` owns one accessible heart toggle, guests persist an array of tour ids under the `wishlist` localStorage key, and saved state survives navigation and reloads.
