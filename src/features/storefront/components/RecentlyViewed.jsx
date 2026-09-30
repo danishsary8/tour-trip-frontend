@@ -42,10 +42,10 @@ export function RecentlyViewed({ tours, excludeId, className }) {
         stagger
         as="ul"
         amount={0.1}
-        className="-mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 pt-2 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 xl:grid-cols-4 [&::-webkit-scrollbar]:hidden"
+        className="-mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 pt-2 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden"
       >
-        {items.slice(0, 6).map((tour, index) => (
-          <RevealItem as="li" key={tour.id} className={cn("w-[78%] max-w-[320px] shrink-0 snap-start sm:w-[46%] lg:w-auto lg:max-w-none", index >= 4 && "xl:hidden", index >= 3 && "lg:max-xl:hidden")}>
+        {items.slice(0, 6).map((tour) => (
+          <RevealItem as="li" key={tour.id} className="w-[78%] max-w-[320px] shrink-0 snap-start sm:w-[46%] lg:w-auto lg:max-w-none">
             <TourCard tour={tour} />
           </RevealItem>
         ))}

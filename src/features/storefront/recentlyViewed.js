@@ -1,13 +1,14 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 /* Last six tours opened on this device, most recent first (localStorage, no account needed). */
-const KEY = "tourtrip.recentlyViewed";
+export const RECENTLY_VIEWED_KEY = "recentlyViewed";
+const LEGACY_KEY = "tourtrip.recentlyViewed";
 const LIMIT = 6;
 const CHANGE_EVENT = "tourtrip:recently-viewed";
 
 function readRaw() {
   try {
-    return localStorage.getItem(KEY) ?? "[]";
+    return localStorage.getItem(RECENTLY_VIEWED_KEY) ?? localStorage.getItem(LEGACY_KEY) ?? "[]";
   } catch {
     return "[]";
   }
@@ -24,7 +25,9 @@ function parse(raw) {
 
 function write(ids) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(ids));
+    const data = JSON.stringify(ids);
+    localStorage.setItem(RECENTLY_VIEWED_KEY, data);
+    localStorage.setItem(LEGACY_KEY, data);
   } catch {
     // Blocked storage just means no history this visit.
   }
@@ -32,7 +35,7 @@ function write(ids) {
 }
 
 function subscribe(callback) {
-  const onStorage = (event) => (event.key === null || event.key === KEY) && callback();
+  const onStorage = (event) => (event.key === null || event.key === RECENTLY_VIEWED_KEY || event.key === LEGACY_KEY) && callback();
   window.addEventListener(CHANGE_EVENT, callback);
   window.addEventListener("storage", onStorage);
   return () => {
