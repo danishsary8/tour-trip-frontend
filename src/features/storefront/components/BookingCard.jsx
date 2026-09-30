@@ -6,13 +6,13 @@ import { ArrowRight, CalendarDays, Check, Minus, Plus, ShieldCheck, X } from "lu
 import { useEscapeLayer } from "../../../hooks/useEscapeLayer";
 import { useFocusTrap } from "../../../hooks/useFocusTrap";
 import { formatUsd } from "../../../lib/format";
+import { CANCELLATION_WINDOW } from "../content";
+import { seatTone, seatsLeft, upcomingSchedules } from "../booking";
 
 const dateFormat = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
 const readableDate = (value) => dateFormat.format(new Date(`${value}T12:00:00Z`));
-const seatsLeft = (schedule) => Math.max(0, schedule.capacity - schedule.seatsBooked);
-const seatTone = (schedule) => seatsLeft(schedule) === 0 ? "bg-danger" : schedule.seatsBooked / schedule.capacity >= 0.8 ? "bg-accent" : "bg-success";
-
-function Counter({ label, value, onChange, min, max }) {
+/** Traveller +/- stepper; also used by the booking wizard's details step. */
+export function Counter({ label, value, onChange, min, max }) {
   return <div className="flex items-center justify-between gap-4 py-3"><span className="text-sm font-medium text-foreground">{label}</span><div className="flex items-center gap-3">
     <button type="button" disabled={value <= min} onClick={() => onChange(value - 1)} aria-label={`Remove one ${label.toLowerCase()}`} className="grid size-9 place-items-center rounded-full border border-border text-foreground outline-none transition-colors hover:border-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"><Minus className="size-4" /></button>
     <output aria-label={`${label}: ${value}`} className="w-5 text-center text-sm font-semibold tabular-nums text-foreground">{value}</output>
@@ -34,7 +34,7 @@ function Picker({ tour, schedules, selected, onSelect, adults, setAdults, childr
     <div className="mt-5 border-t border-border pt-2"><Counter label="Adults" value={adults} min={1} max={Math.max(1, maxTravelers - childrenCount)} onChange={setAdults} /><Counter label="Children" value={childrenCount} min={0} max={Math.max(0, maxTravelers - adults)} onChange={setChildrenCount} /></div>
     <div className="mt-3 flex items-center justify-between border-t border-border pt-5"><span className="text-sm font-semibold text-foreground">Total for {adults + childrenCount} traveller{adults + childrenCount === 1 ? "" : "s"}</span><strong className="font-display text-2xl text-foreground">{formatUsd(total)}</strong></div>
     <button type="button" disabled={!selected || adults + childrenCount > available} onClick={onBook} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-3.5 text-sm font-semibold text-white shadow-glow outline-none transition-all hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0">Book now <ArrowRight className="size-4" aria-hidden="true" /></button>
-    <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted"><ShieldCheck className="size-3.5 text-success-ink" aria-hidden="true" /> No payment is taken in this preview</p>
+    <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted"><ShieldCheck className="size-3.5 text-success-ink" aria-hidden="true" /> Free cancellation up to {CANCELLATION_WINDOW} before</p>
   </div>;
 }
 
@@ -56,7 +56,7 @@ export function BookingCard({ tour, schedules, onBook }) {
   const [adults, setAdults] = useState(1);
   const [childrenCount, setChildrenCount] = useState(0);
   const [open, setOpen] = useState(false);
-  const future = schedules.filter((schedule) => schedule.date >= new Date().toISOString().slice(0, 10)).sort((a, b) => a.date.localeCompare(b.date));
+  const future = upcomingSchedules(schedules);
   const choose = (schedule) => { setSelected(schedule); if (adults + childrenCount > seatsLeft(schedule)) { setAdults(1); setChildrenCount(0); } };
   const submit = () => { if (selected && seatsLeft(selected) >= adults + childrenCount) { setOpen(false); onBook({ date: selected.date, adults, children: childrenCount }); } };
   const props = { tour, schedules: future, selected, onSelect: choose, adults, setAdults, childrenCount, setChildrenCount, onBook: submit };
