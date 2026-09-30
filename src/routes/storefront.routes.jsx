@@ -12,7 +12,7 @@ const ContactPage = lazy(() => import("../features/storefront/pages/ContactPage"
 const FaqPage = lazy(() => import("../features/storefront/pages/FaqPage"));
 const NotFoundPage = lazy(() => import("../features/storefront/pages/NotFoundPage"));
 const TourDetailPage = lazy(() => import("../features/storefront/pages/TourDetailPage"));
-const BookingStubPage = lazy(() => import("../features/storefront/pages/BookingStubPage"));
+const BookingPage = lazy(() => import("../features/storefront/pages/BookingPage"));
 const WishlistPage = lazy(() => import("../features/storefront/pages/WishlistPage"));
 const CustomerBookingsPage = lazy(() => import("../features/storefront/pages/CustomerBookingsPage"));
 
@@ -28,7 +28,7 @@ export const storefrontRoutes = [
   { path: "faq", element: <FaqPage /> },
   { path: "tours/:id", element: <TourDetailPage /> },
   { path: "wishlist", element: <WishlistPage /> },
-  { path: "booking/:tourId", element: <RequireCustomer><BookingStubPage /></RequireCustomer> },
+  { path: "booking/:tourId", element: <RequireCustomer><BookingPage /></RequireCustomer> },
   { path: "account/bookings", element: <RequireCustomer><CustomerBookingsPage /></RequireCustomer> },
   { path: "account/:mode", element: <AccountPage /> },
   // Any URL no other route claims (public, not /admin) lands on the branded 404.
