@@ -2,6 +2,27 @@
 
 This file is append-only. Add new entries at the top of the log section without rewriting prior entries.
 
+## 2026-09-30 — Storefront reconciliation, Part B
+
+- Audited the wishlist implementation already present in the squashed snapshot: the shared `TourCard` owns one accessible heart toggle, guests persist an array of tour ids under the `wishlist` localStorage key, and saved state survives navigation and reloads.
+- Confirmed `/wishlist` keeps saved order, reuses `TourCard`, removes a tour directly from its heart, skips retired ids safely, handles loading/error states, and offers Browse Tours from the empty state.
+- Confirmed the desktop header has one wishlist icon with a live count beside customer controls; the profile and mobile account areas link to the same page without duplicating state.
+- Browser result: save, live badge update, wishlist rendering, removal, and empty-state recovery all pass. No Part B code changes were needed.
+- Remaining in this pass: complete the Guest Flow audit and return-visit/image audit.
+
+## 2026-09-30 — Storefront reconciliation, Part A
+
+- Agent: Codex
+- Branch: `feature/storefront-reconcile`, created from `main` because this standalone remote has no `develop` branch.
+- Repository inventory: after fetch, `origin` contained only the squashed `main` commit (`df71f5d`). The requested `feature/storefront-tour-detail`, `feature/storefront-auth`, `feature/storefront-browse`, and `feature/storefront-polish` refs do not exist, so no merges were fabricated; reconciliation was performed against the code present in the snapshot.
+- Confirmed there is exactly one `src/features/storefront/auth/CustomerAuthContext.jsx`. It exposes customer/user state, mock login and registration, logout, session/local remember-me persistence, and works with the shared safe redirect helpers.
+- Browser-verified the critical flow: choose a Battambang departure and one child, Book now as a guest, arrive at `/login?redirect=…`, sign in with the demo customer, then return to `/booking/battambang-countryside` with the selected date, adult, and child intact.
+- Fixed URL list filters to trim and normalize case, so both generated slug links and the requested `/tours?destination=Battambang` form resolve the Battambang tour.
+- Confirmed Battambang is active on Home, reports one tour on `/destinations`, and is no longer shown as coming soon. Tour Detail matches the storefront card, token, spacing, responsive, and dark-theme language.
+- Confirmed base navigation, More, wishlist, guest controls, and the authenticated profile menu coexist in one header implementation without duplicated controls.
+- Verification: headless Edge at 375, 768, 1280, and 1920 px; no horizontal overflow or console errors. `npm run build` and `npm run lint` pass (existing warnings remain).
+- Remaining in this pass: finish the explicit wishlist, guest-flow, and return-visit audit checkpoints, then replace `docs/NOTES.md` with the final handoff.
+
 ## 2026-09-30 — Phase 7 polish: trust pages, footer, 404 and consistency pass
 
 - Agent: Claude Code
