@@ -16,6 +16,7 @@ import bokorImage from "../assets/images/common/kampot_river.jpg";
 import tonleSapImage from "../assets/images/trips/tonle-lake(1).jpg";
 import streetFoodImage from "../assets/images/trips/Arrival & Siem Reap City.jpg";
 import kepImage from "../assets/images/common/bg_login.jpg";
+import { MOCK_KEYS, onStoredChange, readJson, writeJson } from "./persistence";
 
 /* ------------------------------------------------------------------ utils */
 
@@ -393,6 +394,84 @@ function signupsForDay(date, daysAgo) {
   return poisson(rng, 1.4 * SEASON[date.getMonth()] / (1 + (daysAgo / 365) * 0.28));
 }
 
+/* ------------------------------------------------------- demo traveller */
+
+/**
+ * The storefront's demo customer (customer@tourtrip.com in CustomerAuthContext) with a small
+ * trip history, so My Bookings has something in every tab: two completed trips (reviewable),
+ * a cancelled one, a paid upcoming trip and one awaiting payment. Ids use slot 9 of their
+ * booking day, which the daily generator never reaches (at most nine bookings, slots 0–8).
+ */
+export const DEMO_TRAVELLER = { name: "Sophea Meas", email: "customer@tourtrip.com", phone: "+855 12 345 678" };
+
+const DEMO_TRIPS = [
+  { tourId: "angkor-sunrise", bookedDaysAgo: 62, travelIn: -48, adults: 2, children: 0, status: "Completed", paymentStatus: "Paid", paymentMethod: "ABA Pay (Simulation)" },
+  { tourId: "phnom-penh-city", bookedDaysAgo: 130, travelIn: -118, adults: 1, children: 1, status: "Completed", paymentStatus: "Paid", paymentMethod: "Cash" },
+  { tourId: "bokor-hill", bookedDaysAgo: 40, travelIn: -25, adults: 2, children: 0, status: "Cancelled", paymentStatus: "Unpaid", paymentMethod: "Bank Transfer", cancelReason: "Change of plans" },
+  { tourId: "koh-rong", bookedDaysAgo: 6, travelIn: 20, adults: 2, children: 0, status: "Confirmed", paymentStatus: "Paid", paymentMethod: "Credit Card (Simulation)", time: "09:00", specialRequests: "We'd love a snorkelling stop if the sea is calm." },
+  { tourId: "kulen-mountain", bookedDaysAgo: 1, travelIn: 18, adults: 2, children: 1, status: "Pending", paymentStatus: "Unpaid", paymentMethod: "Bank Transfer", time: "07:30" },
+];
+
+function seedDemoTraveller(today, now, customers, bookings) {
+  const n = customers.length + 1;
+  const customer = {
+    id: `c-${String(n).padStart(4, "0")}`,
+    name: DEMO_TRAVELLER.name,
+    initials: initialsOf(DEMO_TRAVELLER.name),
+    email: DEMO_TRAVELLER.email,
+    phone: DEMO_TRAVELLER.phone,
+    country: "Cambodia",
+    joinedAt: toKey(addDays(today, -150)),
+    status: "Active",
+  };
+  customers.push(customer);
+
+  for (const trip of DEMO_TRIPS) {
+    const tour = TOURS.find((item) => item.id === trip.tourId);
+    const booked = addDays(today, -trip.bookedDaysAgo);
+    const travelDate = toKey(addDays(today, trip.travelIn));
+    const guests = trip.adults + trip.children;
+    const amount = tour.price * guests;
+    const online = trip.paymentMethod !== "Cash";
+    const booking = {
+      id: `TT-${dayNumber(booked) * 10 + 9}`,
+      customerId: customer.id,
+      customerName: customer.name,
+      initials: customer.initials,
+      tourId: tour.id,
+      tourPackage: tour.name,
+      destination: tour.destination,
+      bookingDate: toKey(booked),
+      travelDate,
+      guests,
+      createdAt: new Date(booked.getFullYear(), booked.getMonth(), booked.getDate(), 20, 15).toISOString(),
+      status: trip.status,
+      cancelReason: trip.cancelReason ?? null,
+      paymentStatus: trip.paymentStatus,
+      paymentMethod: trip.paymentMethod,
+      paidDate: trip.paymentStatus === "Paid" ? (online ? toKey(booked) : travelDate) : null,
+      // Storefront pricing: every traveller pays the per-person price (see the FAQ).
+      adults: trip.adults,
+      children: trip.children,
+      infants: 0,
+      unitPrice: tour.price,
+      childPrice: tour.price,
+      subtotal: amount,
+      discount: 0,
+      discountLabel: null,
+      amount,
+      contactName: customer.name,
+      contactEmail: customer.email,
+      contactPhone: customer.phone,
+      specialRequests: trip.specialRequests ?? "",
+      departureTime: trip.time ?? (tour.id === "angkor-sunrise" ? "05:00" : "08:00"),
+      source: "storefront",
+    };
+    booking.statusHistory = historyFor(booking, mulberry32(hashString(`demo:${booking.id}`)), now);
+    bookings.push(booking);
+  }
+}
+
 /* ------------------------------------------------------------ generation */
 
 function generate(now = new Date()) {
@@ -416,6 +495,7 @@ function generate(now = new Date()) {
     while (recentStart < joinedCount && customers[recentStart].joinedAt < recentKey) recentStart += 1;
     bookings.push(...bookingsForDay(date, daysAgo, today, now, { customers, joinedCount, recentStart }));
   }
+  seedDemoTraveller(today, now, customers, bookings);
   bookings.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   // Newest members first in the directory.
   customers.reverse();
@@ -644,3 +724,52 @@ export function summarize(start, end) {
     byStatus: Object.fromEntries(BOOKING_STATUSES.map((status) => [status, bookings.filter((item) => item.status === status).length])),
   };
 }
+
+/* ------------------------------------------------- storefront persistence */
+
+/**
+ * Bookings made on the storefront (and the demo traveller's trips) are saved to localStorage
+ * after every change, by the customer or by an admin, and replayed over the generated data on
+ * load. That is what lets a booking made in one tab show up in the admin Bookings page of
+ * another. Checkout bookings also hold seats on their departure until they are cancelled.
+ */
+const holdsSeats = (booking) => Boolean(booking?.holdsSeats) && booking.status !== "Cancelled";
+
+function adjustSeats(booking, heldBefore) {
+  const delta = Number(holdsSeats(booking)) - Number(heldBefore);
+  if (!delta) return;
+  const schedule = dashboardDb.schedules.find((item) => item.tourId === booking.tourId && item.date === booking.travelDate);
+  if (schedule) schedule.seatsBooked = Math.max(0, schedule.seatsBooked + delta * (booking.adults + booking.children));
+}
+
+export const isStorefrontBooking = (booking) => booking?.source === "storefront";
+
+/**
+ * Call after any change to a storefront booking. `previousStatus` is its status before the
+ * change (`null` for a new booking) so departures gain or release seats correctly.
+ */
+export function saveStorefrontBooking(booking, previousStatus) {
+  if (!isStorefrontBooking(booking)) return;
+  adjustSeats(booking, previousStatus !== null && booking.holdsSeats && previousStatus !== "Cancelled");
+  const stored = readJson(MOCK_KEYS.bookings, {});
+  stored[booking.id] = booking;
+  writeJson(MOCK_KEYS.bookings, stored);
+  invalidateIndex();
+}
+
+function applyStoredBookings(stored) {
+  if (!stored || typeof stored !== "object") return;
+  for (const record of Object.values(stored)) {
+    if (!record?.id || !TOURS.some((tour) => tour.id === record.tourId)) continue;
+    const existing = dashboardDb.bookings.find((item) => item.id === record.id);
+    const heldBefore = holdsSeats(existing);
+    if (existing) Object.assign(existing, record);
+    else dashboardDb.bookings.push(record);
+    adjustSeats(existing ?? record, heldBefore);
+  }
+  dashboardDb.bookings.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  invalidateIndex();
+}
+
+applyStoredBookings(readJson(MOCK_KEYS.bookings, {}));
+onStoredChange(MOCK_KEYS.bookings, "bookings", applyStoredBookings);
