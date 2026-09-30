@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Clock3, MapPin, Star, Users } from "lucide-react";
 import { EmptyState } from "../../../components/shared/EmptyState";
@@ -11,6 +11,9 @@ import { TourGallery } from "../components/TourGallery";
 import { TourSections } from "../components/TourSections";
 import { BookingCard } from "../components/BookingCard";
 import { TourCard } from "../components/TourCard";
+import { ReviewDialog } from "../components/booking/ReviewDialog";
+import { useMyBookings } from "../../bookings/hooks";
+import { useReviewsForBookings } from "../../reviews/hooks";
 import { useCustomerAuth } from "../auth/CustomerAuthContext";
 import { authPath } from "../auth/redirect";
 import { useCatalog, useTourDetail } from "../hooks";
@@ -23,6 +26,12 @@ export default function TourDetailPage() {
   const detail = useTourDetail(id);
   const catalog = useCatalog();
   const viewedId = detail.data?.tour?.id;
+  // A signed-in traveller may review this tour once per Completed booking of it.
+  const mine = useMyBookings(customer.isAuthenticated ? customer.user.email : null);
+  const completed = (mine.data ?? []).filter((booking) => booking.tourId === viewedId && booking.status === "Completed");
+  const myReviews = useReviewsForBookings(completed.map((booking) => booking.id));
+  const reviewable = completed.find((booking) => !myReviews.data?.some((review) => review.bookingId === booking.id));
+  const [reviewing, setReviewing] = useState({ booking: null, open: false });
   // Feeds the "Recently viewed" strip on Home and /tours.
   useEffect(() => {
     if (viewedId) recordTourView(viewedId);
@@ -38,6 +47,9 @@ export default function TourDetailPage() {
     .sort((a, b) => Number(b.destinationId === tour.destinationId) - Number(a.destinationId === tour.destinationId)
       || Number(b.categoryId === tour.categoryId) - Number(a.categoryId === tour.categoryId)
       || b.popularity - a.popularity).slice(0, 3);
+  const reviewAction = !customer.isAuthenticated ? { state: "guest" }
+    : reviewable ? { state: "eligible", onWrite: () => setReviewing({ booking: reviewable, open: true }) }
+    : completed.length ? { state: "reviewed" } : { state: "none" };
   function book(selection) {
     const params = new URLSearchParams({ date: selection.date, adults: String(selection.adults), children: String(selection.children) });
     const target = `/booking/${tour.id}?${params}`;
@@ -59,11 +71,12 @@ export default function TourDetailPage() {
         <p className="mt-1 font-display text-4xl font-semibold tabular-nums text-foreground">{formatUsd(tour.price)}</p></RevealItem>
     </Reveal>
     <Reveal><TourGallery images={photos} title={tour.name} /></Reveal>
-    <div className="mt-12 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px] xl:gap-12"><TourSections tour={tour} story={story} reviews={reviews} /><BookingCard tour={tour} schedules={schedules} onBook={book} /></div>
+    <div className="mt-12 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px] xl:gap-12"><TourSections tour={tour} story={story} reviews={reviews} reviewAction={reviewAction} /><BookingCard tour={tour} schedules={schedules} onBook={book} /></div>
     {related.length > 0 && <section className="mt-16 border-t border-border pt-12 sm:mt-24 sm:pt-16" aria-labelledby="related-tours-title">
       <SectionHeading id="related-tours-title" eyebrow="Keep exploring" title="More journeys to love" link={{ to: "/tours", label: "View all tours" }} />
       <Reveal stagger as="ul" amount={0.1} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">{related.map((item) => <RevealItem as="li" key={item.id}><TourCard tour={item} /></RevealItem>)}</Reveal>
     </section>}
+    {reviewing.booking && <ReviewDialog key={reviewing.booking.id} booking={reviewing.booking} open={reviewing.open} onClose={() => setReviewing((current) => ({ ...current, open: false }))} />}
     <Link to="/tours" className="mt-6 inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground outline-none transition-all hover:-translate-y-0.5 hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary active:scale-95"><ArrowLeft className="size-4" /> All tours</Link>
   </div>;
 }
