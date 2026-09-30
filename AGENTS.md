@@ -97,6 +97,7 @@ The sidebar, breadcrumbs and command palette follow this order (`src/components/
 - Booking status: `Pending`, `Confirmed`, `Completed`, `Cancelled`. "Reject" is `Cancelled` with reason `Rejected by admin`.
 - Payment status: `Unpaid`, `Paid`, `Refunded`.
 - Payment methods (exactly): `Cash`, `Bank Transfer`, `ABA Pay (Simulation)`, `Credit Card (Simulation)`.
+- Checkout: `Cash` and `Bank Transfer` create the booking as `Pending`/`Unpaid` (awaiting admin confirmation). `ABA Pay (Simulation)` and `Credit Card (Simulation)` simulate instant processing and create it as `Confirmed`/`Paid`. Checkout offers only the methods enabled in admin Settings → Payment methods.
 - There is no standalone Payments page. Payments live in Bookings and Reports.
 - Currency: USD (`formatUsd` in `src/lib/format.js`).
 - Mock income is counted on the day money is received: online methods at booking time, cash on the tour day.

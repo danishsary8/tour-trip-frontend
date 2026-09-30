@@ -251,11 +251,17 @@ export function BookingDrawer({ bookingId, open, onClose }) {
                 <label className="min-w-0 flex-1">
                   <span className="mb-1.5 block text-xs font-medium text-muted">Payment method</span>
                   <select
-                    value={booking.paymentMethod}
+                    value={booking.paymentMethod ?? ""}
                     disabled={busy || booking.paymentStatus === "Refunded"}
                     onChange={(event) => changePayment({ paymentMethod: event.target.value }, `Payment method set to ${event.target.value}`)}
                     className="h-10 w-full rounded-control border border-border bg-surface px-3 text-sm text-foreground outline-none transition-colors hover:border-primary/35 focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50"
                   >
+                    {/* Storefront bookings have no method until the guest reaches the payment step. */}
+                    {!booking.paymentMethod && (
+                      <option value="" disabled>
+                        Not chosen yet
+                      </option>
+                    )}
                     {PAYMENT_METHODS.map((method) => (
                       <option key={method}>{method}</option>
                     ))}
@@ -332,7 +338,7 @@ export function BookingDrawer({ bookingId, open, onClose }) {
         title={paymentAction === "Paid" ? `Mark ${booking ? formatUsd(booking.amount) : ""} as paid?` : `Refund ${booking ? formatUsd(booking.amount) : ""}?`}
         description={
           paymentAction === "Paid"
-            ? `Records payment by ${booking?.paymentMethod} today. It counts toward today's income on the dashboard.`
+            ? `Records payment by ${booking?.paymentMethod ?? "the guest's method"} today. It counts toward today's income on the dashboard.`
             : "Marks the payment as refunded and removes it from income. Make sure the money was actually returned."
         }
         confirmLabel={paymentAction === "Paid" ? "Mark as paid" : "Mark as refunded"}
