@@ -2,6 +2,128 @@
 
 This file is append-only. Add new entries at the top of the log section without rewriting prior entries.
 
+## 2026-10-01 — Phase 7c: Booking flow, My Bookings and final storefront pass
+
+- Agent: Claude Code
+- Branch: `feature/storefront-booking`, created from `origin/feature/storefront-reconcile` at `e264943` (the remote had moved four commits past the local copy; it was fast-forwarded first). Pushed; not merged.
+
+### Completed
+
+**Shared data (the admin and the storefront read the same records)**
+- `features/bookings/api.js` gained the customer side of the shared store: `getMyBookings`, `createBooking`, `payBooking` and `cancelMyBooking`. They write to `dashboardDb.bookings`, the same records `/admin/bookings`, the dashboard, Reports and Customers read. Hooks (`useMyBookings`, `useCreateBooking`, `usePayBooking`, `useCancelMyBooking`) reuse the admin cache refresh.
+- A customer is matched to the admin customer directory by email. The first booking of a newly registered customer adds them to the directory.
+- New domain rule, added to AGENTS.md: Cash and Bank Transfer create Pending/Unpaid; ABA Pay (Simulation) and Credit Card (Simulation) process instantly and become Confirmed/Paid. Checkout reads the enabled methods from admin Settings.
+- **Demo traveller.** `customer@tourtrip.com` (Sophea Meas) now has five seeded trips in `mocks/dashboard.js`: two Completed and Paid (Angkor Wat, Phnom Penh), one Cancelled, one Confirmed and Paid by card (Koh Rong, 20 days out), and one Pending bank transfer (Kulen, 18 days out). Every My Bookings tab and both cancel paths have data.
+- **Cross-tab persistence (mock only, `mocks/persistence.js`).** Storefront bookings, traveller reviews and admin settings are saved to localStorage and replayed on load. A `storage` listener plus `app/providers/MockSyncBridge.jsx` refetch the affected queries in other open tabs, so a booking made in one tab appears on a freshly loaded `/admin/bookings`, and disabling a payment method removes it from an open checkout. Admin changes to storefront bookings and reviews are saved too. Checkout bookings hold seats on their departure until they are cancelled.
+- Reviews: `addCustomerReviewToDb` and `submitReview` add a Pending review linked to its booking, which goes into the existing Reviews Management queue. There is one review per booking.
+- Admin tweaks for bookings that have no payment method yet: the drawer select shows "Not chosen yet", the method-change history note handles null, and the Payment report cell reads "Not chosen".
+
+**Part A: `/booking/:tourId` (replaces `BookingStubPage`)**
+- A 4-step wizard (`pages/BookingPage.jsx`, `components/booking/*`) with the admin Tour wizard's stepper language: one bar per step that fills (animated scaleX), numbered labels that turn into checks, "01 / 04" kicker, and a slide between steps. Focus moves to each new step's heading.
+- **Step 1, Your details** (react-hook-form + zod `bookingDetailsSchema`):
+  - Departure picker, using the same seat bars as Tour Detail.
+  - Adults and children counters, pre-filled from the Tour Detail query params, editable and clamped to the seats left.
+  - Lead traveller name and email from the account, and phone from the traveller's latest booking.
+  - Special requests (500 characters, with a counter).
+- **Step 2, Review & confirm:** tour card; date, traveller, contact and request cards, each with an Edit link back to step 1 (values are kept); and the price breakdown. **Confirm booking** creates the record (Pending/Unpaid, no method yet) with a real `TT-` id and puts `?booking=<id>` in the URL. A refresh then resumes at payment or confirmation instead of booking twice.
+- **Step 3, Payment:** only the methods enabled in Settings, shown as cards using the Settings fields (cash instructions, bank name/account/number plus the booking reference, ABA merchant ID, card statement descriptor). A "Simulation" tag marks ABA Pay and Credit Card. A required 72-hour cancellation-policy checkbox gates the button.
+  - Cash and Bank Transfer: "Confirm order" records the method and a history note, and the booking stays Pending/Unpaid.
+  - Online methods: "Pay $X now" runs about 1.7 s of processing, using the login's loading→success button, then the booking becomes Confirmed/Paid.
+- **Step 4, Confirmation:** the success tick draws itself (gold for reserved, green for paid, no confetti), a large booking number with copy, next-step copy ("Your booking is reserved, please complete payment to confirm", plus bank details for transfers), a mock "Confirmation email sent to …" banner, and a summary card. It has **Download invoice**, **View my booking** (`/my-bookings?booking=<id>`) and **Continue exploring**.
+- **Invoice:** `features/bookings/invoice.js` builds a report description for the **existing Reports jsPDF exporter**. `exportReportPdf` gained optional `kicker`, `meta`, `notes` and `datedFilename`, so there is still one export setup. The PDF holds the booking ID, statuses, travel date and time, travellers, method, contact, the price breakdown table, what to pay or refund, the policy and contact details.
+- **Page states:** skeleton while tour, settings and bookings load; an invalid tour id shows "We couldn't find that tour"; a load error has Retry; an unknown `?booking=` shows a not-found state.
+- **Layout:** the price sidebar is sticky at `lg` and matches the Tour Detail card; below `lg` a sticky total bar sits at the bottom, and the floating contact button lifts above it.
+
+**Part B: `/my-bookings` (replaces the sample `CustomerBookingsPage`; `/account/bookings` redirects)**
+- **Page:** stat tiles (upcoming, next departure, completed) and the shared `Tabs` (All, Upcoming, Completed, Cancelled, with counts; `?tab=`). Cards show the photo, name, id, date and time, travellers, total, the status and payment badges, and a one-line "what next" note.
+- **Actions on each card:** Choose payment (resumes checkout), Write a review, View details, Invoice, Cancel.
+- **Detail drawer (`?booking=`):** the confirmation summary plus a traveller-worded history timeline, and the same actions.
+- **Cancel:** available for Pending and Confirmed bookings. The dialog asks for a reason (Change of plans / Found a better option / Emergency / Other; Other needs details). A Paid booking shows "A refund of $X will be processed to your original payment method (…) within 5–7 business days" and becomes Cancelled/Refunded; an Unpaid one cancels with no refund copy. The reason and refund are written to `statusHistory`, so admin sees them.
+- **Reviews:** Completed bookings unlock **Write a review** (star rating as native radios, comment of 20–1000 characters). It submits Pending and toasts "Thanks! Your review is awaiting approval." Tour Detail's button is now live for a signed-in traveller with a completed, unreviewed booking of that tour. Otherwise it says why it is locked: sign in, complete this tour first, or already submitted.
+- **Page states:** skeletons; an empty account shows "No trips booked yet" with Browse Tours; an empty tab shows "Show all bookings"; a load error has Retry.
+
+**Part C: final pass**
+- The header profile menu and mobile menu now point to `/my-bookings` (`ACCOUNT_LINKS`).
+- Removed the remaining placeholder states:
+  - the Google "coming soon" buttons on login and register;
+  - the `/account/:mode` "next release" copy (it now only redirects);
+  - Tour Detail's "No payment is taken in this preview" (it now shows the free-cancellation line).
+  - The legacy `/booking` route (a teammate page offering PayPal/"card") now redirects to `/tours`; the file is kept.
+
+### Files
+
+- **New:**
+  - `mocks/persistence.js`, `app/providers/MockSyncBridge.jsx`, `features/bookings/invoice.js`
+  - `features/storefront/booking.js`, `features/storefront/components/FormField.jsx`
+  - `features/storefront/components/booking/{BookingStepper, PriceSummary, SuccessCheck, DetailsStep, ReviewStep, PaymentStep, ConfirmationStep, BookingSummary, MyBookingCard, BookingDetailDrawer, CancelBookingDialog, ReviewDialog}.jsx` and `styles.js`
+  - `features/storefront/pages/{BookingPage, MyBookingsPage}.jsx`
+- **Changed:**
+  - `mocks/{dashboard, reviews}.js`
+  - `features/bookings/{api, hooks}.js`, `features/bookings/components/BookingDrawer.jsx`
+  - `features/reviews/{api, hooks}.js`, `features/settings/api.js`
+  - `features/reports/export.js`, `features/reports/components/PaymentReport.jsx`
+  - `features/storefront/{schema, navigation}.js`
+  - `features/storefront/components/{BookingCard, FloatingContact, TourReviews, TourSections}.jsx`
+  - `features/storefront/pages/{TourDetailPage, AccountPage, CustomerLoginPage, CustomerRegisterPage}.jsx`
+  - `routes/{storefront, public}.routes.jsx`, `app/providers/AppProviders.jsx`, `AGENTS.md`
+- **Removed:** `features/storefront/pages/{BookingStubPage, CustomerBookingsPage}.jsx`. Both were placeholders this phase was asked to replace.
+
+### Commits
+
+- `c0edce3` feat(mocks): seed a demo traveller and share customer-side changes across tabs
+- `3a13590` feat(bookings): add customer create, pay and cancel on the shared store
+- `a74b863` feat(reviews): accept pending reviews from travellers
+- `3348902` feat(booking): add booking wizard shell pieces and step 1 details form
+- `42c5cbb` feat(booking): add review and confirm step with live price breakdown
+- `a0d2c4f` feat(booking): add payment step with enabled-methods logic and simulation
+- `d62bd13` feat(booking): add confirmation step with pdf invoice download
+- `f1db7ad` feat(booking): replace the booking stub with the checkout wizard
+- `39121f5` feat(my-bookings): add cancel booking flow with refund messaging
+- `51c19c3` feat(my-bookings): add review dialog for completed trips
+- `0964d5d` feat(my-bookings): add booking detail view and invoice download
+- `a4d2c61` feat(my-bookings): add bookings list with status filters
+- `77219b1` feat(my-bookings): unlock review submission for completed bookings
+- `2779b4a` fix(storefront): final end-to-end sanity pass
+- `docs: update worklog and note for danish`
+
+### Verification
+
+- **Per-commit builds:** every commit above (except the docs commit) was checked out in a temporary worktree and passed `vite build` and `oxlint` on its own. The final `npm run build` passes and `npm run lint` exits 0; the only warnings are pre-existing kinds.
+- **Scripted browser checks:** headless Edge via `puppeteer-core`, installed in the scratchpad and not in the project, against `vite preview`. There were no console errors in any run.
+  - **Cash path:** guest `/booking/kampot-adventure` → `/login?redirect=…` → back with the travellers kept. Contact was pre-filled, the Edit round trip kept the date, and TT-24641 was created Pending/Unpaid. Only enabled methods were offered (Cash, Bank Transfer, ABA Pay; Credit Card is off by default). Pay stays disabled until a method is chosen and the policy is ticked. Confirmation showed "reserved" and the email banner, and the invoice PDF (4.4 KB) was opened and checked field by field.
+  - **Card path:** Credit Card was enabled through the real `/admin/settings` Payment tab; checkout then listed it. Paying showed the processing line and then "You're all set!". A freshly loaded `/admin/bookings` row read "Paid Confirmed".
+  - **Disabling a method:** turning Cash off in admin removed it from the next checkout. A booking abandoned before payment shows Unpaid/Pending in admin, and its drawer shows "Not chosen yet".
+  - **My Bookings:** tabs All 5 / Upcoming 2 / Completed 2 / Cancelled 1.
+    - Cancelling the paid Koh Rong trip showed the reason validation, then the "$320 … Credit Card … 5–7 business days" refund copy; admin showed "Refunded Cancelled".
+    - Cancelling the unpaid Kulen trip showed no refund copy; admin showed "Unpaid Cancelled".
+    - The Angkor review toasted "Thanks! Your review is awaiting approval.", and admin Reviews listed it as Pending 5.0. The Tour Detail button then read "Review submitted" on Angkor and "Write a review" on Phnom Penh.
+  - **End to end by clicking:** Home → Tours → Kampot → date + 2 adults → Book now (guest) → login → review → confirm → ABA Pay → confirmation. A reload stays on the confirmation. View my booking opened the drawer, cancelling with "Other" required details and then refunded, and the profile menu's My bookings link goes to `/my-bookings`. `/booking/not-a-tour` shows the not-found state.
+  - **Responsive:** the booking page, My Bookings and the detail drawer at 375, 768, 1280 and 1920, in light and dark, with 0 px horizontal overflow. All four steps were also completed at 375 (Bank Transfer).
+- **Not checked:** real touch devices and screen readers.
+
+### Decisions
+
+- **Children pay the per-person price at checkout.** Tour Detail and the FAQ already say so, so storefront bookings store `childPrice = unitPrice`. The generated admin history still uses 60% child prices. **Danish to decide** which rule the API should follow.
+- **Paid bookings follow the 72-hour promise.** Outside the window they cancel online with a full refund. Inside it, the Cancel button is disabled and explains that the traveller should contact the team (the FAQ promises no refund inside the window). Unpaid bookings can be cancelled until departure.
+- **The booking is created on "Confirm booking"**, before a method is chosen (`paymentMethod: null`), as the brief asked. If the traveller stops there, My Bookings offers "Choose payment", which resumes the wizard.
+- **Cross-tab persistence is localStorage,** and only for the records both sides touch. Without it, the admin in another tab could never see a customer booking. It sits under `src/mocks/` and disappears with the API.
+- **Removed the Google buttons** rather than keep a dead "coming soon" action. Re-add them with real OAuth (for example Laravel Socialite).
+- **The invoice reuses the Reports exporter** (Helvetica, Latin-1). The file name is `tourtrip-invoice-<id>.pdf`.
+- **Admin Settings stays the source of truth** for payment methods. Credit Card starts disabled in the mock settings, so it has to be switched on in admin to test the card path.
+
+### Known issues
+
+- Mock data still regenerates on reload. Only storefront bookings, traveller reviews and settings persist, per browser, under `tourtrip.mock.*` keys. Clear those keys (or site data) to reset the demo. Booking ids are only unique within one browser's data.
+- The `EXPLORE10` promo banner is still display-only; checkout has no promo-code field.
+- Social profile links in the footer and on Contact are still `#` placeholders until real accounts exist.
+- The floating contact button can cover the lower-right corner of a payment card at 375 px until you scroll.
+- Legacy teammate routes outside the flow (`/explore`, `/trips/:id`, `/tour/detail`) are untouched and not linked from the storefront.
+- An earlier local tweak (lazy-loading the stub's image) was stashed at the start ("local booking stub lazy-img tweak"). The same change was already on the remote, and the stub is now gone, so the stash can be dropped.
+
+### Next steps
+
+Frontend is feature-complete for the Guest/Customer/Admin flows defined in the flow diagrams. Everything runs on mock data. Backend (Laravel API) development begins next — each features/*/api.js file is the integration point where mock functions get swapped for real HTTP calls.
+
 ## 2026-09-30 — Storefront reconciliation: Parts C & D (Guest Flow Audit & Polish)
 
 - Agent: Antigravity
