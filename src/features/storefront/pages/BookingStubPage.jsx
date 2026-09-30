@@ -17,7 +17,7 @@ export default function BookingStubPage() {
   const { tourId } = useParams();
   const [params] = useSearchParams();
   const catalog = useCatalog();
-  const tour = catalog.data?.tours.find((item) => item.id === tourId);
+  const tour = catalog.data?.tours.find((item) => item.id === tourId || item.id?.toLowerCase() === tourId?.toLowerCase());
   const date = params.get("date");
   const adults = Number(params.get("adults") ?? 1) || 1;
   const children = Number(params.get("children") ?? 0) || 0;
@@ -51,7 +51,17 @@ export default function BookingStubPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:p-6">
-              {tour && <img src={tour.image} alt="" width="160" height="120" className="aspect-[4/3] w-full shrink-0 rounded-card object-cover sm:w-40" />}
+              {tour && (
+                <img
+                  src={tour.image}
+                  alt=""
+                  width="160"
+                  height="120"
+                  loading="lazy"
+                  decoding="async"
+                  className="aspect-[4/3] w-full shrink-0 rounded-card object-cover sm:w-40"
+                />
+              )}
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-ink">{tour?.destination ?? "Tour"}</p>
                 <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] text-foreground">{tour?.name ?? tourId}</h2>
