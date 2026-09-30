@@ -92,7 +92,10 @@ export default function ToursPage() {
     setParams((current) => withFilters(current, Object.fromEntries(FILTER_KEYS.map((key) => [key, ""]))), { replace: true });
   }
 
-  const nameOf = (list, id) => list.find((item) => item.id === id)?.name ?? id;
+  const nameOf = (list, id) => {
+    const norm = id.toLowerCase();
+    return list.find((item) => item.id === id || item.id === norm || item.id === norm.replace(/ /g, "-") || item.name.toLowerCase() === norm)?.name ?? id;
+  };
   const chips = [
     filters.q && { key: "q", label: `“${filters.q}”`, remove: () => update({ q: "" }) },
     ...filters.destination.map((id) => ({ key: `d-${id}`, label: nameOf(destinations, id), remove: () => update({ destination: filters.destination.filter((value) => value !== id) }) })),
