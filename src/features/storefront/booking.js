@@ -2,6 +2,7 @@
  * Checkout helpers shared by the booking wizard, My Bookings and the Tour Detail booking card:
  * seats, pricing, the payment methods admin Settings leaves enabled, and the cancellation rule.
  */
+import { formatUsd } from "../../lib/format";
 import { PAYMENT_METHOD_LABELS } from "../settings/schema";
 
 export const BOOKING_STEPS = [
@@ -60,10 +61,14 @@ export function hoursUntilDeparture(booking) {
 export function cancellationOf(booking, settings) {
   if (!["Pending", "Confirmed"].includes(booking.status)) return { allowed: false, reason: null };
   const hours = hoursUntilDeparture(booking);
-  if (hours <= 0) return { allowed: false, reason: "This tour has already started." };
+  if (hours <= 0) return { allowed: false, reason: "This tour has already started.", short: "Tour already started" };
   const windowHours = cancellationHours(settings);
   if (booking.paymentStatus === "Paid" && hours < windowHours) {
-    return { allowed: false, reason: `Your tour starts in less than ${windowHours} hours, so it can no longer be refunded online. Contact us and we'll try to move you to another date.` };
+    return {
+      allowed: false,
+      reason: `Your tour starts in less than ${windowHours} hours, so it can no longer be refunded online. Contact us and we'll try to move you to another date.`,
+      short: `Within ${windowHours} hours of departure`,
+    };
   }
   return { allowed: true, reason: null };
 }
@@ -82,3 +87,7 @@ const plural = (count, one, many) => `${count} ${count === 1 ? one : many}`;
 /** "2 adults, 1 child". */
 export const travellersLabel = (adults, children) =>
   [plural(adults, "adult", "adults"), children > 0 && plural(children, "child", "children")].filter(Boolean).join(", ");
+
+/** The refund promise shown when a paid booking is cancelled. */
+export const refundMessage = (booking) =>
+  `A refund of ${formatUsd(booking.amount)} will be processed to your original payment method (${customerMethodName(booking.paymentMethod)}) within 5–7 business days.`;
