@@ -22,7 +22,13 @@ export const RATING_OPTIONS = [
   { value: "4", label: "4.0 & up" },
 ];
 
-const list = (value) => (value ? value.split(",").filter(Boolean) : []);
+const list = (value) =>
+  value
+    ? value
+        .split(",")
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean)
+    : [];
 const number = (value) => (value === null || value === "" || Number.isNaN(Number(value)) ? null : Number(value));
 
 export function parseFilters(params) {
