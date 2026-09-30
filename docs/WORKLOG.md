@@ -2,6 +2,14 @@
 
 This file is append-only. Add new entries at the top of the log section without rewriting prior entries.
 
+## 2026-09-30 — Storefront reconciliation, Part B
+
+- Audited the wishlist implementation already present in the squashed snapshot: the shared `TourCard` owns one accessible heart toggle, guests persist an array of tour ids under the `wishlist` localStorage key, and saved state survives navigation and reloads.
+- Confirmed `/wishlist` keeps saved order, reuses `TourCard`, removes a tour directly from its heart, skips retired ids safely, handles loading/error states, and offers Browse Tours from the empty state.
+- Confirmed the desktop header has one wishlist icon with a live count beside customer controls; the profile and mobile account areas link to the same page without duplicating state.
+- Browser result: save, live badge update, wishlist rendering, removal, and empty-state recovery all pass. No Part B code changes were needed.
+- Remaining in this pass: complete the Guest Flow audit and return-visit/image audit.
+
 ## 2026-09-30 — Storefront reconciliation, Part A
 
 - Agent: Codex
