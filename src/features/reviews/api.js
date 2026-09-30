@@ -1,5 +1,6 @@
 import apiClient from "../../lib/axios";
 import {
+  addCustomerReviewToDb,
   getReviewsDb,
   updateReviewStatusInDb,
   deleteReviewFromDb,
@@ -84,4 +85,19 @@ export async function deleteReview({ id }) {
 
   await wait(450);
   return deleteReviewFromDb(id);
+}
+
+/** Reviews a traveller has written, keyed by the booking they reviewed. */
+export async function getReviewsForBookings(bookingIds) {
+  if (!useMock) return apiClient.get("/customer/reviews").then(({ data }) => data);
+  await wait(250);
+  const wanted = new Set(bookingIds);
+  return getReviewsDb().filter((review) => wanted.has(review.bookingId));
+}
+
+/** A completed booking's review from My Bookings or Tour Detail; it waits in the admin queue as Pending. */
+export async function submitReview({ bookingId, customerName, tourName, rating, comment }) {
+  if (!useMock) return apiClient.post(`/customer/bookings/${bookingId}/review`, { rating, comment }).then(({ data }) => data);
+  await wait(600);
+  return addCustomerReviewToDb({ bookingId, customerName, tourName, rating, comment: comment.trim() });
 }

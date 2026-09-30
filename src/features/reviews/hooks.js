@@ -6,6 +6,8 @@ import {
   updateReviewStatus,
   restoreReviewStatus,
   deleteReview,
+  getReviewsForBookings,
+  submitReview,
 } from "./api";
 
 export const REVIEWS_KEY = ["reviews"];
@@ -275,4 +277,24 @@ export function useReviewActions() {
     isUpdating: updateStatus.isPending,
     updatingId: updateStatus.variables?.id,
   };
+}
+
+/** The customer's own reviews for the given bookings (under ["reviews"], so moderation refreshes it). */
+export function useReviewsForBookings(bookingIds) {
+  return useQuery({
+    queryKey: [...REVIEWS_KEY, "for-bookings", bookingIds.join(",")],
+    queryFn: () => getReviewsForBookings(bookingIds),
+    enabled: bookingIds.length > 0,
+  });
+}
+
+export function useSubmitReview() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: submitReview,
+    onSettled: () => {
+      refreshReviewsAfterChange(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["storefront"] });
+    },
+  });
 }
