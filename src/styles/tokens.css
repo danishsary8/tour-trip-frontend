@@ -1,0 +1,62 @@
+:root {
+  --background: #f6f1ea;
+  --surface: #ffffff;
+  --surface-2: #eee8df;
+  --border: rgba(26, 31, 33, 0.12);
+  --foreground: #1a1f21;
+  --muted: #6b7275;
+  --primary: #c8553d;
+  --accent: #e9b949;
+  --success: #2f8f83;
+  --warning: #e0a43b;
+  --danger: #d9534f;
+  --info: #3b82c4;
+  --focus-ring: rgba(200, 85, 61, 0.34);
+  --shadow-soft: 0 2px 8px rgba(25, 18, 13, 0.06), 0 18px 44px rgba(25, 18, 13, 0.1);
+  --shadow-panel: 0 4px 12px rgba(25, 18, 13, 0.08), 0 30px 80px rgba(25, 18, 13, 0.18);
+  --shadow-glow: 0 0 0 4px var(--focus-ring), 0 12px 32px rgba(200, 85, 61, 0.22);
+  --font-display: "Bricolage Grotesque Variable", "Kantumruy Pro", sans-serif;
+  --font-ui: "Inter Variable", "Kantumruy Pro", sans-serif;
+}
+
+.dark {
+  --background: #0b1215;
+  --surface: #121b1f;
+  --surface-2: #18242a;
+  --border: rgba(255, 255, 255, 0.08);
+  --foreground: #eef2f1;
+  --muted: #8a9a9c;
+  --focus-ring: rgba(233, 185, 73, 0.28);
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.24), 0 18px 48px rgba(0, 0, 0, 0.3);
+  --shadow-panel: 0 4px 14px rgba(0, 0, 0, 0.3), 0 32px 100px rgba(0, 0, 0, 0.48);
+  --shadow-glow: 0 0 0 4px var(--focus-ring), 0 12px 32px rgba(200, 85, 61, 0.2);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  /* Text-safe tints of the status colours: mixed toward the foreground so they keep AA contrast in both themes. */
+  --color-primary-ink: color-mix(in srgb, var(--primary) 72%, var(--foreground));
+  --color-accent-ink: color-mix(in srgb, var(--accent) 58%, var(--foreground));
+  --color-success-ink: color-mix(in srgb, var(--success) 70%, var(--foreground));
+  --color-info-ink: color-mix(in srgb, var(--info) 70%, var(--foreground));
+  --color-danger-ink: color-mix(in srgb, var(--danger) 72%, var(--foreground));
+  --font-sans: var(--font-ui);
+  --font-display: var(--font-display);
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-panel: 24px;
+  --shadow-soft: var(--shadow-soft);
+  --shadow-panel: var(--shadow-panel);
+  --shadow-glow: var(--shadow-glow);
+}
