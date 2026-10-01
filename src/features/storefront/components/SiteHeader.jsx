@@ -201,9 +201,10 @@ export function SiteHeader({ overHero = false }) {
   const transparent = overHero && !scrolled;
 
   function handleSignOut() {
-    logout();
-    toast.info("You have signed out of your account.");
+    // Leave the page first, so a signed-in-only page (My bookings) doesn't bounce to sign-in.
     navigate("/", { replace: true });
+    window.setTimeout(logout, 0);
+    toast.info("You have signed out of your account.");
   }
 
   return (

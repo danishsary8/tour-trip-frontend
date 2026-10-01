@@ -81,7 +81,9 @@ function pickWeighted(rng, items, weightOf = (item) => item.weight) {
     roll -= weightOf(item);
     if (roll <= 0) return item;
   }
-  return items[items.length - 1];
+  // Float rounding can leave a sliver of roll: fall back to the last item that can be picked, so
+  // zero-weight entries (tours added after the history, e.g. International Escapes) never are.
+  return items.findLast((item) => weightOf(item) > 0) ?? items[items.length - 1];
 }
 
 const initialsOf = (name) =>

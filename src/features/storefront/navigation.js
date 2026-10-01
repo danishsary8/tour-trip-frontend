@@ -14,7 +14,7 @@ export const STOREFRONT_MORE_NAV = [
   {
     title: "Explore",
     items: [
-      { label: "Gallery", to: "/gallery", description: "Cambodia through our guests' lenses", icon: Images, match: startsWith("/gallery") },
+      { label: "Gallery", to: "/gallery", description: "Photographs from every tour we run", icon: Images, match: startsWith("/gallery") },
       { label: "Reviews", to: "/reviews", description: "What travellers say after the trip", icon: MessageSquareQuote, match: startsWith("/reviews") },
     ],
   },
