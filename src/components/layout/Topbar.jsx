@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, ChevronRight, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Search, Settings, UserRound } from "lucide-react";
 import { useAuth } from "../../features/auth/AuthContext";
+import { formatLastLogin } from "../../features/auth/security";
 import { useShellSummary } from "../../features/notifications/hooks";
 import { usePopover } from "../../hooks/usePopover";
 import { cn } from "../../lib/cn";
@@ -125,9 +126,10 @@ function SearchTrigger() {
 
 function ProfileMenu() {
   const { open, toggle, close, triggerRef, panelRef } = usePopover();
-  const { user, logout } = useAuth();
+  const { user, previousLogin, logout } = useAuth();
   const { data } = useShellSummary();
   const navigate = useNavigate();
+  const lastLogin = formatLastLogin(previousLogin);
   const name = data?.profile?.name ?? "Admin";
   const role = data?.profile?.role ?? "Administrator";
   const email = user?.email ?? data?.profile?.email;
@@ -140,7 +142,7 @@ function ProfileMenu() {
   function handleLogout() {
     close();
     logout();
-    navigate("/login", { replace: true });
+    navigate("/admin/login", { replace: true });
   }
 
   return (
@@ -171,6 +173,11 @@ function ProfileMenu() {
         <div className="mb-1 border-b border-border px-2.5 pb-2.5 pt-1.5" role="none">
           <p className="truncate text-sm font-semibold">{name}</p>
           <p className="truncate text-xs text-muted">{email}</p>
+          {lastLogin && (
+            <p className="mt-1.5 text-[11px] leading-snug text-muted">
+              Last login: <span className="text-foreground/80">{lastLogin}</span>
+            </p>
+          )}
         </div>
         <MenuItem icon={UserRound} onClick={() => go("/admin/profile")}>
           Profile
