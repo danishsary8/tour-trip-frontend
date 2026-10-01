@@ -8,14 +8,10 @@ import { Drawer } from "../../../components/shared/Drawer";
 import { StatusBadge } from "../../../components/shared/StatusBadge";
 import { Button } from "../../../components/ui/Button";
 import { TOUR_STEPS, tourSchema } from "../schema";
-import angkor from "../../../assets/images/trips/Angkor-Wat(1).jpg";
-import gallery from "../../../assets/images/trips/angkor-gallery(1).jpg";
-import palace from "../../../assets/images/common/royal_palace.jpg";
-import island from "../../../assets/images/common/koh_rong_island.jpg";
-import kampot from "../../../assets/images/common/kampot_river.jpg";
-import temple from "../../../assets/images/common/ta_prohm.jpg";
+import { TOUR_PHOTOS } from "../../../mocks/tourImages";
 
-const PHOTOS = [angkor, gallery, palace, island, kampot, temple];
+// The real tour photo library (see mocks/tourImages.js).
+const PHOTOS = Object.values(TOUR_PHOTOS).flat().map((photo) => photo.src);
 const field = "w-full rounded-control border border-border bg-surface-2/40 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20";
 
 function Field({ label, name, register, errors, type = "text", children, ...props }) {

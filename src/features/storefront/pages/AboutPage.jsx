@@ -2,14 +2,16 @@ import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useInView } from "framer-motion";
 import { ArrowUpRight, HandCoins, HeartHandshake, Languages, Star, UsersRound } from "lucide-react";
-import heroImage from "../../../assets/images/common/login_bg_luxury.jpg";
-import storyImage from "../../../assets/images/common/ta_prohm.jpg";
-import storyImageSmall from "../../../assets/images/common/kampot_river.jpg";
+import { TOUR_PHOTOS } from "../../../mocks/tourImages";
 import { EmptyState } from "../../../components/shared/EmptyState";
 import { Skeleton } from "../../../components/shared/Skeleton";
 import { AnimatedNumber } from "../../../components/ui/AnimatedNumber";
 import { Button } from "../../../components/ui/Button";
 import { cn } from "../../../lib/cn";
+
+const heroPhoto = TOUR_PHOTOS["angkor-sunrise"][0];
+const storyPhoto = TOUR_PHOTOS["angkor-sunrise"][2];
+const storyPhotoSmall = TOUR_PHOTOS["kampot-adventure"][0];
 import { Breadcrumbs } from "../components/Breadcrumbs";
 import { CtaBand } from "../components/HomeSections";
 import { Reveal, RevealItem } from "../components/Reveal";
@@ -29,8 +31,8 @@ function Hero({ stats }) {
       </Reveal>
       <Reveal variants={revealScale} className="relative isolate flex h-[440px] items-end overflow-hidden rounded-[32px] bg-[#0b1215] sm:h-[540px]">
         <img
-          src={heroImage}
-          alt="Angkor Wat's towers reflected in the lotus pond at golden hour"
+          src={heroPhoto.src}
+          alt={heroPhoto.alt}
           width="1600"
           height="900"
           fetchPriority="high"
@@ -110,10 +112,10 @@ function Story() {
     <section aria-labelledby="about-story" className={cn(container, "grid items-center gap-12 pt-24 sm:pt-32 lg:grid-cols-[1fr_1.1fr] lg:gap-20")}>
       <Reveal variants={revealScale} className="relative mx-auto w-full max-w-md lg:max-w-none">
         <div className="aspect-[4/5] overflow-hidden rounded-[32px] bg-surface-2">
-          <img src={storyImage} alt="Tree roots growing over a carved doorway at Ta Prohm" width="800" height="1000" loading="lazy" decoding="async" className="size-full object-cover" />
+          <img src={storyPhoto.src} alt={storyPhoto.alt} width="800" height="1000" loading="lazy" decoding="async" className="size-full object-cover" />
         </div>
         <div className="absolute -bottom-8 -right-3 hidden aspect-square w-[44%] overflow-hidden rounded-panel border-[6px] border-background bg-surface-2 shadow-panel sm:block lg:-right-8">
-          <img src={storyImageSmall} alt="Morning mist on the river at Kampot" width="400" height="400" loading="lazy" decoding="async" className="size-full object-cover" />
+          <img src={storyPhotoSmall.src} alt={storyPhotoSmall.alt} width="400" height="400" loading="lazy" decoding="async" className="size-full object-cover" />
         </div>
         <p className="absolute -left-3 top-8 grid size-28 place-items-center rounded-full bg-accent text-center font-display text-[#241a06] shadow-panel lg:-left-8">
           <span>

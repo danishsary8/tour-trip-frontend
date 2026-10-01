@@ -14,13 +14,10 @@ import { StatusBadge } from "../../../components/shared/StatusBadge";
 import { Button } from "../../../components/ui/Button";
 import { useDeleteDestination, useDestinationStatus, useDestinations, useSaveDestination } from "../../../features/destinations/hooks";
 import { destinationSchema } from "../../../features/destinations/schema";
-import angkor from "../../../assets/images/trips/Angkor-Wat(1).jpg";
-import river from "../../../assets/images/common/kampot_river.jpg";
-import island from "../../../assets/images/common/koh_rong_island.jpg";
-import palace from "../../../assets/images/common/royal_palace.jpg";
-import temple from "../../../assets/images/common/ta_prohm.jpg";
+import { TOUR_PHOTOS } from "../../../mocks/tourImages";
 
-const PHOTOS = [angkor, river, island, palace, temple];
+// One cover photo per tour from the real photo library (see mocks/tourImages.js).
+const PHOTOS = Object.values(TOUR_PHOTOS).map((set) => set[0].src);
 const field = "w-full rounded-control border border-border bg-surface-2/40 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20";
 
 function DestinationForm({ item, onSave }) {

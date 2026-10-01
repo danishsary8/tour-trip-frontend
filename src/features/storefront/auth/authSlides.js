@@ -1,16 +1,18 @@
-import angkorBg from "../../../assets/images/common/login_bg_luxury.jpg";
-import kohRongBg from "../../../assets/images/common/koh_rong_island.jpg";
-import mekongBg from "../../../assets/images/common/mekong_river_sunset.jpg";
-import kampotBg from "../../../assets/images/common/kampot_river.jpg";
-import royalPalaceBg from "../../../assets/images/common/royal_palace.jpg";
-import taProhmBg from "../../../assets/images/common/ta_prohm.jpg";
+import { TOUR_PHOTOS } from "../../../mocks/tourImages";
+
+const angkorBg = TOUR_PHOTOS["angkor-sunrise"][0].src;
+const kohRongBg = TOUR_PHOTOS["koh-rong"][0].src;
+const tonleSapBg = TOUR_PHOTOS["tonle-sap-village"][0].src;
+const kampotBg = TOUR_PHOTOS["kampot-adventure"][0].src;
+const royalPalaceBg = TOUR_PHOTOS["phnom-penh-city"][0].src;
+const taProhmBg = TOUR_PHOTOS["angkor-sunrise"][2].src;
 
 /** Hero slideshow behind the customer /login, /register and /forgot-password pages. */
 export const AUTH_SLIDES = [
   {
     id: "angkor",
     image: angkorBg,
-    alt: "Angkor Wat sunrise reflecting in tranquil lotus ponds",
+    alt: "Angkor Wat silhouetted at sunrise over the reflecting pool",
     tagline: "Sacred Stone & Dawn Light",
     title: "Angkor Sunrise",
     subtitle: "Sacred Sanctuaries · Siem Reap",
@@ -24,10 +26,10 @@ export const AUTH_SLIDES = [
   {
     id: "koh-rong",
     image: kohRongBg,
-    alt: "Saracen Bay wooden pier and crystal clear turquoise sea in Koh Rong Sanloem",
+    alt: "Lazy Beach on Koh Rong Sanloem",
     tagline: "Untouched Shores & Azure Waters",
     title: "Koh Rong Island",
-    subtitle: "Saracen Bay · Sihanoukville",
+    subtitle: "Lazy Beach · Koh Rong Sanloem",
     gradient: "from-[#5eead4] via-[#2dd4bf] to-[#0ea5e9]",
     description:
       "Cross to Saracen Bay by longtail boat, snorkel clear turquoise water and stay for the glowing plankton after dark.",
@@ -36,23 +38,23 @@ export const AUTH_SLIDES = [
       "bg-[radial-gradient(circle_at_18%_80%,rgba(20,184,166,.35),transparent_42%),radial-gradient(circle_at_78%_12%,rgba(56,189,248,.18),transparent_36%)]",
   },
   {
-    id: "mekong",
-    image: mekongBg,
-    alt: "Traditional wooden boat on the golden Mekong River at sunset",
-    tagline: "Living Waters & Sacred Currents",
-    title: "Mekong Odyssey",
-    subtitle: "Golden Hour Riverways · Rural Cambodia",
+    id: "tonle-sap",
+    image: tonleSapBg,
+    alt: "Wooden houses on tall stilts beside the Tonlé Sap",
+    tagline: "Living Waters & Changing Seasons",
+    title: "Tonlé Sap Lake",
+    subtitle: "Stilted Villages · Siem Reap",
     gradient: "from-[#fbbf24] via-[#f97316] to-[#ec4899]",
     description:
-      "Experience authentic river life, wooden longboat riverway crossings, and golden sunset reflections bordered by sugar palm groves.",
-    meta: "Mekong riverways · Village life",
+      "Glide past houses raised high on stilts and learn how lakeside families live with water that rises and falls with the seasons.",
+    meta: "Southeast Asia's largest lake",
     glowStyle:
       "bg-[radial-gradient(circle_at_20%_85%,rgba(249,115,22,.32),transparent_40%),radial-gradient(circle_at_75%_10%,rgba(236,72,153,.18),transparent_35%)]",
   },
   {
     id: "kampot",
     image: kampotBg,
-    alt: "Kampot river with mist-covered Bokor mountain and riverside bungalows",
+    alt: "The Kampot river with the Elephant Mountains behind",
     tagline: "Mountain Mist & Emerald Streams",
     title: "Kampot Serenity",
     subtitle: "Bokor Mist & Preaek Tuek Chhu · Kampot",
@@ -66,7 +68,7 @@ export const AUTH_SLIDES = [
   {
     id: "royal-palace",
     image: royalPalaceBg,
-    alt: "The golden Throne Hall spires and tropical gardens of the Royal Palace Phnom Penh",
+    alt: "The Royal Palace in Phnom Penh lit up at night",
     tagline: "Golden Spire & Living Royalty",
     title: "Royal Palace",
     subtitle: "Chaktomuk Heritage · Phnom Penh",
@@ -80,7 +82,7 @@ export const AUTH_SLIDES = [
   {
     id: "ta-prohm",
     image: taProhmBg,
-    alt: "Ancient giant Spung tree roots entwined over the stone ruins of Ta Prohm temple",
+    alt: "Silk-cotton tree roots over a doorway at Ta Prohm",
     tagline: "Centuries of Stone & Living Roots",
     title: "Ta Prohm Ruins",
     subtitle: "Jungle Sanctuary · Angkor Archaeological Park",
