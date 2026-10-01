@@ -57,7 +57,7 @@ function SearchBox({ value, onCommit }) {
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
         placeholder="Search tours, places or styles"
-        className="h-12 w-full rounded-full border border-border bg-surface pl-11 pr-4 text-[15px] text-foreground outline-none transition-colors placeholder:text-muted hover:border-foreground/25 focus:border-primary focus:ring-2 focus:ring-primary/20"
+        className="h-12 w-full rounded-full border border-border bg-transparent pl-11 pr-4 text-[15px] text-foreground outline-none transition-colors placeholder:text-muted hover:border-foreground/25 focus:border-primary focus:ring-2 focus:ring-primary/20"
       />
     </label>
   );
@@ -116,10 +116,10 @@ export default function ToursPage() {
 
   return (
     <>
-      <PageIntro breadcrumbs={[{ label: "Tours" }]} eyebrow="Search tours" title="Find your Cambodia">
+      <PageIntro breadcrumbs={[{ label: "Tours" }]} eyebrow="Every tour we run" title="Find your trip">
         {catalog.isLoading
           ? "Loading tours…"
-          : `${tours.length} small-group tours across ${destinations.filter((item) => item.tourCount).length} destinations. Filter by place, style, price and length.`}
+          : `${tours.filter((tour) => !tour.international).length} small-group tours across Cambodia, and ${tours.filter((tour) => tour.international).length} International Escapes beyond it. Filter by place, style, price and length.`}
       </PageIntro>
 
       <div className="mx-auto grid max-w-[1320px] gap-10 px-5 pb-24 lg:grid-cols-[272px_minmax(0,1fr)] lg:px-8">
@@ -220,7 +220,7 @@ export default function ToursPage() {
                 action={<Button onClick={() => catalog.refetch()}>Try again</Button>}
               />
             ) : catalog.isLoading ? (
-              <ul className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" aria-label="Loading tours">
+              <ul className="grid gap-x-6 gap-y-12 sm:grid-cols-2 xl:grid-cols-3" aria-label="Loading tours">
                 {Array.from({ length: PAGE_SIZE }, (_, index) => (
                   <li key={index}>
                     <TourCardSkeleton />
@@ -243,7 +243,7 @@ export default function ToursPage() {
                   animate="visible"
                   exit={{ opacity: 0, transition: { duration: reduceMotion ? 0 : 0.15 } }}
                   variants={{ hidden: {}, visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.06 } } }}
-                  className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
+                  className="grid gap-x-6 gap-y-12 sm:grid-cols-2 xl:grid-cols-3"
                 >
                   {shown.map((tour, index) => (
                     <motion.li

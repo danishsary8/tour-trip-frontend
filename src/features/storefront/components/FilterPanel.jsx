@@ -145,12 +145,14 @@ export function FilterPanel({ filters, onChange, destinations, categories, bound
         <RegionSwitch value={filters.region} onChange={changeRegion} />
       </Group>
       <Group title="Destination">
+        <div className="space-y-3">
         {filters.region !== "international" && (
           <CheckList name="destination" heading={abroad.length ? "Cambodia" : undefined} options={home.map(toOption)} selected={filters.destination} onChange={changeDestination} />
         )}
         {filters.region !== "cambodia" && abroad.length > 0 && (
           <CheckList name="destination" heading="Beyond Cambodia" options={abroad.map(toOption)} selected={filters.destination} onChange={changeDestination} />
         )}
+        </div>
       </Group>
       <Group title="Travel style">
         <CheckList

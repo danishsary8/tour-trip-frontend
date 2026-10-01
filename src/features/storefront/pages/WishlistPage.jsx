@@ -71,7 +71,7 @@ export default function WishlistPage() {
             action={<Button onClick={() => catalog.refetch()}>Try again</Button>}
           />
         ) : catalog.isLoading && ids.length > 0 ? (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+          <ul className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8">
             {ids.slice(0, 6).map((id) => (
               <li key={id}>
                 <TourCardSkeleton />
@@ -90,7 +90,7 @@ export default function WishlistPage() {
             }
           />
         ) : (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+          <ul className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8">
             <AnimatePresence initial={false} mode="popLayout">
               {tours.map((tour) => (
                 <motion.li
