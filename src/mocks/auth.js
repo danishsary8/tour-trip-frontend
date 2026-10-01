@@ -10,9 +10,3 @@ export const MOCK_ADMIN_CREDENTIALS = {
   password: "Admin@123",
   otp: "123456",
 };
-
-export const MOCK_LOGIN_STATS = [
-  { value: "156", label: "Tours" },
-  { value: "2,358", label: "Bookings" },
-  { value: "4.8★", label: "Rating" },
-];

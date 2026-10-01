@@ -37,22 +37,3 @@ export async function resendOtp(challengeId) {
   await wait(600);
   return { sent: true };
 }
-
-export async function signUp(userData) {
-  if (!useMock) return apiClient.post("/auth/register", userData).then(({ data }) => data);
-  await wait(850);
-  return {
-    success: true,
-    message: "Account created successfully",
-    user: {
-      id: `usr-${Date.now()}`,
-      name: userData.firstName ? `${userData.firstName} ${userData.lastName}` : (userData.fullName || "Traveler"),
-      email: userData.email,
-      phone: userData.phone,
-      dob: userData.dob,
-      role: "traveler",
-    },
-  };
-}
-
-
