@@ -2,6 +2,147 @@
 
 This file is append-only. Add new entries at the top of the log section without rewriting prior entries.
 
+## 2026-10-01 — Storefront redesign: real photos, International Escapes, new Tour Detail
+
+- Agent: Claude Code
+- Branch: `feature/storefront-redesign`, from `origin/main` at `6fb8c4d` (both storefront-booking and login-separation are merged there). Pushed; not merged.
+
+### Part A — Image audit and replacement
+
+**Audit (before):** most catalogue photos were wrong or not real photography.
+- `common/royal_palace`, `koh_rong_island`, `mekong_river_sunset`, `kampot_river`, `ta_prohm` and `login_bg_luxury` were AI renderings (generated in the 2026-09-29 entries).
+- Kep showed an overwater-bungalow resort (`bg_login.jpg`), not Kep.
+- Kulen showed Ta Prohm.
+- Bokor and Battambang shared the same misty river.
+- Kampot used a generic Mekong sunset.
+- The street-food tour used a daytime street with a watermark.
+- `angkor-gallery(1).jpg` was 40 KB.
+- The Angkor cover was heavily processed, with a blurred block.
+
+**Sourcing method (automatic):** Unsplash search, free licence only (Unsplash+ excluded); Pexels blocks scripted access. Each candidate was viewed on a contact sheet and accepted only if its caption, tags or location named the place (for example, Kampot river shots tagged `kampot`, and Bayon captioned "Bayon temple in Angkor"). I rejected look-alikes, such as the Buddha-head-in-roots photos, which are Ayutthaya in Thailand. 39 photos were downloaded resized (2000 px covers, 1600 px others, JPEG q70; about 17 MB in all) into `src/assets/images/tours/<tour-id>/`, with `CREDITS.md`.
+
+**Wiring:** `src/mocks/tourImages.js` is the single map: per tour, an ordered photo list with title, alt text and real pixel size; the first photo is the cover. Tour records (`dashboard.js`), the Tour Detail gallery, the public Gallery, About, the sign-in slideshow and the admin photo pickers all read it. Deleted the now-unused `bg_login`, `kampot_river`, `login_bg_luxury` and `ta_prohm`. **The Home hero is untouched** and still uses `otp_background`, `mekong_river_sunset`, `koh_rong_island` and `royal_palace`; three of those are AI renderings (see Known issues).
+
+### Part B — International Escapes (schema decision)
+
+- **Model:** destinations gain `country` (default `"Cambodia"`, filled in by `.map` in `DESTINATIONS`). There are three new non-Cambodian destination records: `bali` (Indonesia), `hanoi-ha-long` (Vietnam) and `kyoto` (Japan). Each tour keeps exactly one `destinationId` and takes `country` from it, so every existing destination-based feature keeps working: filters, reports, the admin Masters CRUD, bookings and seat counts. `tour.international` is simply `country !== "Cambodia"`. This was chosen over a `country` field on tours with no destination because many screens assume `tour.destination` exists.
+- **Category** `international` ("International Escapes", Plane icon).
+- **Tours:**
+  - Bali Highlands & Rice Terraces: 5 days, $890.
+  - Hanoi & Ha Long Bay Discovery: 4 days, $640.
+  - Kyoto Temples & Gardens: 5 days, $1,380.
+
+  Each has full copy, a day-by-day itinerary, inclusions and exclusions, highlights, two departures and real photos.
+- **Weight 0:** the booking-history generator never picks them, so dashboards and reports are unchanged. This was verified by fingerprinting the generated history through Vite SSR on `main` vs this branch: 3,138 bookings, identical hash. `pickWeighted`'s rounding fallback now skips zero-weight items as a guard.
+- **Where they appear:**
+  - **Home:** a "Beyond the border" dark band. Featured tours and the destination mosaic stay Cambodian.
+  - **/tours:** a Where filter (`?region=cambodia|international`), destinations grouped Cambodia / Beyond Cambodia, a "4 days or more" duration, and search that matches the country.
+  - **/destinations:** their own band.
+- **Admin:** a Country field in the destination form, the Plane category icon, and the Destination report showing "Region, Country".
+
+### Part C — Tour Detail redesign (tabs vs scroll)
+
+- **Decision: one long scrolling page with a sticky chapter nav, not tabs.** Each section is short (one paragraph, 4–5 highlights, 1–5 days), so tabs hid most of the page behind clicks. Travellers compare itinerary, inclusions and dates together, and reviews were previously one tab away. The sticky nav with scroll-spy keeps one-click access, so nothing is lost from tabs.
+- **Structure:**
+  - **Hero:** full-bleed cover with the title set over it, the category and place, the tagline, a facts strip (length, group, rating, price), real coordinates and "All N photos". The header goes transparent over it through a new `HeroHeaderContext`.
+  - **Chapters:** Overview (lead paragraph and ruled facts) → Highlights (new) → Photos (editorial mosaic into the existing Lightbox) → Itinerary (a dashed "route rail" with day waypoints) → What's included → Departures (new in-page list) → Reviews.
+  - **After the chapters:** "Further along the route" related tours.
+- **Booking mechanics unchanged:** departure and traveller selection moved into `useBookingSelection` so the Departures list and the sticky card or mobile sheet share one choice. The guest Book now goes to `/login?redirect=…` as before. `TourSections` and `TourGallery` were replaced and removed.
+
+### Part D — Visual refresh
+
+- **Design language:** the logo's dashed flight path became the "route mark" (eyebrows) and the itinerary rail. Boxes gave way to ruled lines, photos are given room, and dark bands use the dark token set via the `dark` class. Tokens and fonts are unchanged.
+- **D1:**
+  - **TourCard:** editorial, with a 4:5 photo, text on the page and a ruled price line, plus the country for international tours.
+  - **Card grids:** more vertical rhythm.
+  - **/tours sidebar:** unboxed, with a Refine rule and a segmented Where switch.
+- **D2:**
+  - **Destinations:** editorial grid and a Beyond Cambodia band.
+  - **Gallery:** masonry with captions and "See the tour", with real image sizes so it doesn't shift.
+  - **Reviews:** ruled summary whose bars filter, and a two-column quote list.
+  - **FAQ:** ruled accordion, plus a new flights-and-visas question for International Escapes.
+  - **Contact and About:** unboxed lists, values and team.
+  - **Home:** categories unboxed.
+- **D3:** checkout panels, price summary, payment cards and My Bookings lost their heavy shadows. The sign-in slideshow has real photos and the route mark. No structural changes.
+
+### Part E — Completeness checklist
+
+Every node below was reached by clicking real links (header, More menu, footer, account menu, cards, buttons) in headless Edge against `vite preview`. All 28 checks passed.
+
+- [x] Home
+- [x] Hero search → Tour listing
+- [x] Header → Tours
+- [x] Filters (Abroad, region, duration, search)
+- [x] Tour card → Tour Detail
+- [x] Book now (guest) → Login with redirect
+- [x] Login → Register (redirect kept)
+- [x] Login → Forgot password
+- [x] More → Gallery
+- [x] More → Reviews
+- [x] More → About
+- [x] More → Contact
+- [x] More → FAQ
+- [x] Header → Destinations → destination tours (Kyoto)
+- [x] Home International band → Tour Detail
+- [x] Header heart → Wishlist
+- [x] Footer internal links (12)
+- [x] 404 page
+- [x] Customer login → Home
+- [x] Tour Detail → Booking step 1
+- [x] Step 2 Review & confirm
+- [x] Step 3 Payment (only enabled methods)
+- [x] Step 4 Confirmation
+- [x] Confirmation → My bookings
+- [x] Account menu (My bookings, Wishlist, Explore tours)
+- [x] Sign out → Home
+- [x] Sweep of 15 pages × 375/768/1280/1920 × light/dark: no horizontal overflow, every page has an h1, the theme applies, and no console errors.
+
+Admin smoke test: dashboard, Masters (tours, destinations, categories, schedules), Bookings, Reports and Reviews all load without errors, and the new data shows where expected.
+
+**Fixed during the audit:**
+- Signing out from a signed-in-only page landed on `/login?redirect=/my-bookings`, because the exiting page's guard kept its old router location. Sign-out now navigates first, and `RequireCustomer` ignores the sign-out once the browser has moved on.
+- The Gallery menu description claimed guest photos.
+
+### Files
+
+- **New:**
+  - `mocks/tourImages.js`
+  - `assets/images/tours/**` (39 photos and `CREDITS.md`)
+  - `features/storefront/{places.js, useBookingSelection.js, layouts/heroHeader.js}`
+  - `features/storefront/components/{RouteMark, TourChapters}.jsx`
+- **Changed:**
+  - **Mocks:** `mocks/{dashboard, masters, storefrontDetails}.js`
+  - **Storefront logic and pages:** `features/storefront/{mocks, filters, booking, navigation, categoryIcons, content}.js`, Home, Tours, TourDetail, Destinations, Gallery, Reviews, FAQ, Contact, About, Booking and MyBookings pages
+  - **Storefront components:** TourCard, FilterPanel, PageIntro, SectionHeading, HomeSections, BookingCard, TourReviews, SiteHeader, MobileMenu, booking styles/panels, `auth/{authSlides.js, RequireCustomer.jsx}`, `layouts/StorefrontLayout.jsx`
+  - **Shared:** `components/effects/TextSlideshow.jsx`, `components/shared/Lightbox.jsx`
+  - **Admin:** `features/{categories, destinations}/schema.js`, `features/reports/*`, `features/tours/components/TourWizard.jsx`, admin `masters/{Categories, Destinations}Page.jsx`
+  - **Docs:** `AGENTS.md`
+- **Deleted:** `components/{TourGallery, TourSections}.jsx` and 4 unused `common/` images.
+
+### Commits
+
+- `719417a` feat(assets): replace mismatched tour images with real sourced photography
+- `48702d0` feat(storefront): add international escapes category and three new tours
+- `b8f5d60` feat(storefront): wire international tours into home, listing and filters
+- `cc9c9f9` feat(tour-detail): add highlights for every tour (**does not build on its own, see Known issues**)
+- `007317b` refactor(tour-detail): redesign to immersive editorial layout
+- `3572ca0` style(storefront): refresh tour listing card style and filter sidebar
+- `b33d344` style(storefront): consistency pass on destinations, gallery, reviews, about, contact, faq
+- `8d421d0` style(storefront): visual consistency pass on auth and booking flow
+- `2f57cc8` fix(storefront): resolve gaps found in final flow completeness audit
+- `docs: update worklog and note for danish`
+
+All other commits passed `vite build` and `oxlint` (exit 0) when checked out on their own.
+
+### Known issues
+
+- **Commit `cc9c9f9` doesn't build alone:** it accidentally includes the deletion of `TourGallery`/`TourSections`, which were staged at the time. The branch tip and every other commit are fine. A rebuilt history with identical final code (every commit building) was prepared at `58824d7`, but it needs a force-push, which wasn't run without approval. Options: squash-merge (simplest), or approve the force-push.
+- **Home hero images:** the hero still uses three AI-rendered images (Mekong, Koh Rong, Royal Palace), because the brief said to keep it exactly as is. They can be swapped for files from `assets/images/tours/` in `HomeHero.jsx` without layout changes.
+- **Photo coverage gaps:** there's no Kulen reclining-Buddha or Battambang workshop photo. Those tours use real waterfall and countryside photos instead.
+- **Repository size:** the photo set adds about 17 MB.
+- **Legacy pages:** the unlinked teammate routes `/explore` and `/trips/:id` still use their old images.
+- **Not tested:** real devices and screen readers.
+
 ## 2026-10-01 — Separate customer and admin login pages
 
 - Agent: Claude Code
