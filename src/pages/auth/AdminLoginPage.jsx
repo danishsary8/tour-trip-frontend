@@ -1,34 +1,21 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
-import { LockKeyhole, Mail, Sparkles, UserPlus } from "lucide-react";
+import { LockKeyhole, Mail, Sparkles } from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import FlipCard from "../../components/ui/FlipCard";
 import { Button } from "../../components/ui/Button";
 import { Checkbox } from "../../components/ui/Checkbox";
-import { Divider } from "../../components/ui/Divider";
 import { Input } from "../../components/ui/Input";
 import { PasswordInput } from "../../components/ui/PasswordInput";
-import { AuthLayout } from "../../layouts/AuthLayout";
 import { useAuth } from "../../features/auth/AuthContext";
 import { resendOtp, signIn, verifyOtp } from "../../features/auth/api";
 import { OtpVerificationForm } from "../../features/auth/components/OtpVerificationForm";
-import { RegisterCardForm } from "../../features/auth/components/RegisterCardForm";
 import { loginSchema, otpSchema } from "../../features/auth/schema";
 
-function GoogleMark() {
-  return (
-    <span className="font-display text-base font-bold text-[#f2c45a]" aria-hidden="true">
-      G
-    </span>
-  );
-}
-
 export default function AdminLoginPage() {
-  const [isFlipped, setIsFlipped] = useState(false);
   const [step, setStep] = useState("login");
   const [challenge, setChallenge] = useState(null);
   const [loginPending, setLoginPending] = useState(false);
@@ -104,14 +91,7 @@ export default function AdminLoginPage() {
     toast.info("Demo credentials filled in");
   }
 
-  function handleRegistrationSuccess(email) {
-    if (email) {
-      setValue("email", email, { shouldValidate: true });
-    }
-    setIsFlipped(false);
-  }
-
-  // Front Card Face: Sign In & OTP Verification
+  // Sign in, then OTP verification. Admin accounts are never self-registered.
   const FrontContent = (
     <div className="w-full h-full min-h-[585px] rounded-[24px] border border-white/14 bg-[#10191d]/96 p-6 shadow-[0_24px_70px_rgba(0,0,0,.55),inset_0_1px_rgba(255,255,255,.12)] transform-gpu sm:p-8 lg:p-9 flex flex-col justify-between [contain:paint]">
       <div className="relative z-20 flex h-full flex-1 flex-col justify-between">
@@ -122,16 +102,6 @@ export default function AdminLoginPage() {
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/6 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.17em] text-white/65">
               <Sparkles className="size-3 text-accent" /> Secure access
             </span>
-
-            {/* Quick 3D Flip Action Switcher */}
-            <button
-              type="button"
-              data-no-flip="true"
-              onClick={() => setIsFlipped(true)}
-              className="group inline-flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent transition-all hover:border-accent/50 hover:bg-accent/20 active:scale-95"
-            >
-              <UserPlus className="size-3.5" /> Sign up
-            </button>
           </div>
 
           <AnimatePresence mode="wait">
@@ -207,30 +177,6 @@ export default function AdminLoginPage() {
               >
                 Sign in
               </Button>
-
-              <Divider>or</Divider>
-
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="w-full border-white/13 bg-white/[.035]"
-                onClick={() => toast.info("Google sign-in coming soon")}
-              >
-                <GoogleMark /> Continue with Google
-              </Button>
-
-              <p className="pt-1 text-center text-sm text-white/50">
-                New here?{" "}
-                <button
-                  type="button"
-                  data-no-flip="true"
-                  onClick={() => setIsFlipped(true)}
-                  className="font-medium text-accent transition-colors hover:text-[#f4ce72] hover:underline hover:underline-offset-4"
-                >
-                  Create an account
-                </button>
-              </p>
             </motion.form>
           ) : (
             <OtpVerificationForm
@@ -255,17 +201,9 @@ export default function AdminLoginPage() {
     </div>
   );
 
-  // Back Card Face: Sign Up / Registration
-  const BackContent = (
-    <div className="w-full h-full min-h-[585px] rounded-[24px] border border-white/14 bg-[#10191d]/96 p-6 shadow-[0_24px_70px_rgba(0,0,0,.55),inset_0_1px_rgba(255,255,255,.12)] transform-gpu sm:p-8 lg:p-9 flex flex-col justify-between [contain:paint]">
-      <div className="relative z-20 flex h-full flex-1 flex-col justify-between">
-        <RegisterCardForm onSwitchToLogin={handleRegistrationSuccess} />
-      </div>
-    </div>
-  );
 
   return (
-    <AuthLayout>
+    <main className="dark grid min-h-dvh place-items-center bg-[#081013] px-5 py-10 text-white">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -273,25 +211,11 @@ export default function AdminLoginPage() {
         className="min-w-0 w-full max-w-[520px] max-lg:w-[calc(100vw-2.5rem)] max-lg:max-w-none"
       >
         <motion.div animate={cardControls}>
-          <FlipCard
-            front={FrontContent}
-            back={BackContent}
-            flipped={isFlipped}
-            onFlipChange={(flipped) => setIsFlipped(flipped)}
-            axis="y"
-            duration={0.52}
-            perspective={1200}
-            radius={24}
-            shadow={true}
-            shadowColor="#000000"
-            shadowOpacity={0.45}
-            ariaLabel="Authentication flip card"
-            className="w-full min-w-0"
-          />
+          {FrontContent}
         </motion.div>
 
 
-        {import.meta.env.DEV && !isFlipped && step === "login" && (
+        {import.meta.env.DEV && step === "login" && (
           <button
             type="button"
             onClick={autofillDemo}
@@ -301,6 +225,6 @@ export default function AdminLoginPage() {
           </button>
         )}
       </motion.div>
-    </AuthLayout>
+    </main>
   );
 }

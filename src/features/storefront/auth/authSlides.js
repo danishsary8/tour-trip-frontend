@@ -1,10 +1,11 @@
-import angkorBg from "../../assets/images/common/login_bg_luxury.jpg";
-import kohRongBg from "../../assets/images/common/koh_rong_island.jpg";
-import mekongBg from "../../assets/images/common/mekong_river_sunset.jpg";
-import kampotBg from "../../assets/images/common/kampot_river.jpg";
-import royalPalaceBg from "../../assets/images/common/royal_palace.jpg";
-import taProhmBg from "../../assets/images/common/ta_prohm.jpg";
+import angkorBg from "../../../assets/images/common/login_bg_luxury.jpg";
+import kohRongBg from "../../../assets/images/common/koh_rong_island.jpg";
+import mekongBg from "../../../assets/images/common/mekong_river_sunset.jpg";
+import kampotBg from "../../../assets/images/common/kampot_river.jpg";
+import royalPalaceBg from "../../../assets/images/common/royal_palace.jpg";
+import taProhmBg from "../../../assets/images/common/ta_prohm.jpg";
 
+/** Hero slideshow behind the customer /login, /register and /forgot-password pages. */
 export const AUTH_SLIDES = [
   {
     id: "angkor",
@@ -15,8 +16,8 @@ export const AUTH_SLIDES = [
     subtitle: "Sacred Sanctuaries · Siem Reap",
     gradient: "from-[#f5c66b] via-[#e89d58] to-[#c8553d]",
     description:
-      "Coordinate dawn temple access, licensed heritage historians, and conservation-first visitor experiences across Angkor.",
-    meta: "Siem Reap Heritage · 99.4% Satisfaction",
+      "Watch dawn break over the five towers with a licensed heritage guide, then explore the inner galleries before the crowds arrive.",
+    meta: "Siem Reap · Temple heritage",
     glowStyle:
       "bg-[radial-gradient(circle_at_15%_82%,rgba(200,85,61,.32),transparent_38%),radial-gradient(circle_at_76%_8%,rgba(233,185,73,.16),transparent_34%)]",
   },
@@ -29,8 +30,8 @@ export const AUTH_SLIDES = [
     subtitle: "Saracen Bay · Sihanoukville",
     gradient: "from-[#5eead4] via-[#2dd4bf] to-[#0ea5e9]",
     description:
-      "Oversee beachfront wooden bungalow retreats, authentic island longtail crossings, and crystal turquoise bay sanctuaries.",
-    meta: "Gulf of Thailand · 42 Pristine Bays",
+      "Cross to Saracen Bay by longtail boat, snorkel clear turquoise water and stay for the glowing plankton after dark.",
+    meta: "Gulf of Thailand · Island escapes",
     glowStyle:
       "bg-[radial-gradient(circle_at_18%_80%,rgba(20,184,166,.35),transparent_42%),radial-gradient(circle_at_78%_12%,rgba(56,189,248,.18),transparent_36%)]",
   },
@@ -44,7 +45,7 @@ export const AUTH_SLIDES = [
     gradient: "from-[#fbbf24] via-[#f97316] to-[#ec4899]",
     description:
       "Experience authentic river life, wooden longboat riverway crossings, and golden sunset reflections bordered by sugar palm groves.",
-    meta: "Living Mekong · 2,350+ Travelers",
+    meta: "Mekong riverways · Village life",
     glowStyle:
       "bg-[radial-gradient(circle_at_20%_85%,rgba(249,115,22,.32),transparent_40%),radial-gradient(circle_at_75%_10%,rgba(236,72,153,.18),transparent_35%)]",
   },
@@ -71,7 +72,7 @@ export const AUTH_SLIDES = [
     subtitle: "Chaktomuk Heritage · Phnom Penh",
     gradient: "from-[#fcd34d] via-[#f59e0b] to-[#d97706]",
     description:
-      "Curate sovereign cultural tours through ornate Khmer throne halls, sacred Silver Pagoda treasures, and frangipani royal courtyards.",
+      "Walk the ornate throne halls, see the Silver Pagoda's treasures and rest in frangipani-scented royal courtyards.",
     meta: "Chaktomuk Capital · Historic Spires",
     glowStyle:
       "bg-[radial-gradient(circle_at_15%_78%,rgba(245,158,11,.32),transparent_40%),radial-gradient(circle_at_82%_14%,rgba(251,191,36,.18),transparent_35%)]",

@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Compass } from "lucide-react";
-import { AUTH_SLIDES } from "../../features/auth/authSlides";
 
 const INTERVAL_MS = 6500;
 
 export function TextSlideshow({
-  slides = AUTH_SLIDES,
+  slides,
   activeIndex,
   onSlideChange,
   className = "",

@@ -63,7 +63,7 @@ function computeInitials(name) {
 /**
  * The one customer (storefront) auth source, mounted once in AppProviders. Separate from admin
  * auth. Exposes `isAuthenticated`, `user`, `isLoading`, `login(email, password, remember)`,
- * `register(name, email, password)` and `logout()`. "Remember me" keeps the session in
+ * `register(name, email, password, profile?)` (profile: `{ phone, dob }`) and `logout()`. "Remember me" keeps the session in
  * localStorage, otherwise sessionStorage. The `?redirect=` hop lives in `./redirect.js` and
  * `RequireCustomer`. (Replaces the temporary `?mockAuth=true` seam from the tour-detail branch.)
  */
@@ -131,7 +131,7 @@ export function CustomerAuthProvider({ children }) {
     }
   }, []);
 
-  const register = useCallback(async (name, email, password) => {
+  const register = useCallback(async (name, email, password, profile = {}) => {
     setIsLoading(true);
     try {
       // Mock network latency ~700ms
@@ -150,6 +150,8 @@ export function CustomerAuthProvider({ children }) {
         name: name.trim(),
         email: normalizedEmail,
         password,
+        phone: profile.phone || null,
+        dob: profile.dob || null,
         role: "customer",
         initials,
         memberSince: new Date().getFullYear().toString(),
@@ -163,6 +165,7 @@ export function CustomerAuthProvider({ children }) {
         id: newAccount.id,
         name: newAccount.name,
         email: newAccount.email,
+        phone: newAccount.phone,
         role: "customer",
         initials: newAccount.initials,
         avatar: null,
