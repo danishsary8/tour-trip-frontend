@@ -149,7 +149,7 @@ export function Lightbox({
                 <motion.img
                   key={currentItem.id || currentItem.src || index}
                   src={typeof currentItem === "string" ? currentItem : currentItem.src}
-                  alt={currentItem.title || currentItem.alt || "Cambodia gallery photo"}
+                  alt={currentItem.alt || currentItem.title || "Tour photo"}
                   initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}

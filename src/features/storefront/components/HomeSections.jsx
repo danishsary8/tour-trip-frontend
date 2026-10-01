@@ -20,26 +20,26 @@ export function CategoriesSection({ categories, loading }) {
       <SectionHeading id="home-categories" eyebrow="Travel your way" title="Find the trip that feels like you" link={{ to: "/tours", label: "Browse all tours" }}>
         From temple sunrises to street-food nights, pick a style and we&apos;ll show you where it leads.
       </SectionHeading>
-      <Reveal stagger as="ul" className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-6 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden">
+      <Reveal stagger as="ul" className="-mx-5 flex snap-x snap-mandatory gap-6 overflow-x-auto px-5 pb-4 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-7 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden">
         {loading
-          ? Array.from({ length: 6 }, (_, index) => (
-              <li key={index} className="w-44 shrink-0 lg:w-auto">
-                <Skeleton className="h-44 rounded-panel" />
+          ? Array.from({ length: 7 }, (_, index) => (
+              <li key={index} className="w-40 shrink-0 lg:w-auto">
+                <Skeleton className="h-32 rounded-card" />
               </li>
             ))
           : categories.map((category) => {
               const Icon = CATEGORY_ICONS[category.icon] ?? Compass;
               return (
-                <RevealItem as="li" key={category.id} variants={revealScale} className="w-44 shrink-0 snap-start lg:w-auto">
+                <RevealItem as="li" key={category.id} variants={revealScale} className="w-40 shrink-0 snap-start lg:w-auto">
                   <Link
                     to={`/tours?category=${category.id}`}
-                    className="group flex h-full flex-col justify-between gap-6 rounded-panel border border-border bg-surface p-5 outline-none transition-[transform,box-shadow,border-color,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-panel focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-4 focus-visible:ring-offset-background active:translate-y-0"
+                    className="group flex h-full flex-col gap-5 border-t border-foreground/80 pt-5 outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
                   >
-                    <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary-ink transition-[transform,background-color,color] duration-500 group-hover:-rotate-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white">
+                    <span className="grid size-11 place-items-center rounded-full border border-primary/25 text-primary-ink transition-colors duration-300 group-hover:border-primary group-hover:bg-primary group-hover:text-white">
                       <Icon className="size-6" aria-hidden="true" />
                     </span>
                     <span>
-                      <span className="block font-display text-lg font-semibold leading-tight tracking-[-0.02em] text-foreground">{category.name}</span>
+                      <span className="block font-display text-lg font-semibold leading-tight tracking-[-0.02em] text-foreground decoration-primary/40 decoration-2 underline-offset-4 group-hover:underline">{category.name}</span>
                       <span className="mt-1 block text-sm text-muted">
                         {category.tourCount} {category.tourCount === 1 ? "tour" : "tours"}
                       </span>

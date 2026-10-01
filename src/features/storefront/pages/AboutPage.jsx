@@ -15,6 +15,7 @@ const storyPhotoSmall = TOUR_PHOTOS["kampot-adventure"][0];
 import { Breadcrumbs } from "../components/Breadcrumbs";
 import { CtaBand } from "../components/HomeSections";
 import { Reveal, RevealItem } from "../components/Reveal";
+import { RouteMark } from "../components/RouteMark";
 import { SectionHeading } from "../components/SectionHeading";
 import { ABOUT_STORY, ABOUT_VALUES, FOUNDED_YEAR, TEAM_COPY } from "../content";
 import { useAbout, useCatalog } from "../hooks";
@@ -41,8 +42,8 @@ function Hero({ stats }) {
         <span className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/35 to-black/5" aria-hidden="true" />
         <div className="flex w-full flex-col gap-6 p-6 pb-16 text-white sm:p-10 sm:pb-24 lg:flex-row lg:items-end lg:justify-between lg:px-14 lg:pb-24">
           <div className="max-w-3xl">
-            <p className="mb-4 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-[#f1c968]">
-              <span className="h-px w-8 bg-[#f1c968]/70" aria-hidden="true" />
+            <p className="mb-4 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-accent">
+              <RouteMark tone="light" />
               About TourTrip · Since {FOUNDED_YEAR}
             </p>
             <h1 className="font-display text-[40px] font-semibold leading-[1.02] tracking-[-0.04em] text-balance sm:text-6xl lg:text-7xl">
@@ -127,7 +128,7 @@ function Story() {
 
       <Reveal stagger>
         <RevealItem as="p" className="mb-3 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary-ink">
-          <span className="h-px w-8 bg-primary/60" aria-hidden="true" />
+          <RouteMark />
           Our story
         </RevealItem>
         <RevealItem as="h2" id="about-story" className="font-display text-[34px] font-semibold leading-[1.05] tracking-[-0.035em] text-balance text-foreground sm:text-5xl">
@@ -139,7 +140,7 @@ function Story() {
           </RevealItem>
         ))}
         <RevealItem as="p" className="mt-7 font-display text-lg font-semibold text-foreground">
-          Sokha, Dara &amp; Vanna <span className="font-sans text-sm font-normal text-muted">— founders</span>
+          Sokha, Dara &amp; Vanna <span className="font-sans text-sm font-normal text-muted">· founders</span>
         </RevealItem>
       </Reveal>
     </section>
@@ -150,15 +151,15 @@ function Values() {
   return (
     <section aria-labelledby="about-values" className={cn(container, "pt-24 sm:pt-32")}>
       <SectionHeading id="about-values" eyebrow="How we travel" title="What we won't compromise on" />
-      <Reveal stagger as="ul" className="grid gap-4 md:grid-cols-3 lg:gap-5">
+      <Reveal stagger as="ul" className="grid gap-x-10 gap-y-8 border-t border-foreground/80 pt-8 md:grid-cols-3">
         {ABOUT_VALUES.map((value, index) => {
           const Icon = VALUE_ICONS[index] ?? HeartHandshake;
           return (
-            <RevealItem as="li" key={value.title} variants={revealScale} className="rounded-panel border border-border bg-surface p-6 sm:p-7">
-              <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary-ink">
-                <Icon className="size-6" aria-hidden="true" />
+            <RevealItem as="li" key={value.title} variants={revealScale}>
+              <span className="grid size-11 place-items-center rounded-full border border-primary/25 text-primary-ink">
+                <Icon className="size-5" aria-hidden="true" />
               </span>
-              <h3 className="mt-6 font-display text-xl font-semibold tracking-[-0.02em] text-foreground">{value.title}</h3>
+              <h3 className="mt-5 font-display text-xl font-semibold tracking-[-0.02em] text-foreground">{value.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-pretty text-muted">{value.body}</p>
             </RevealItem>
           );
@@ -171,9 +172,9 @@ function Values() {
 function TeamCard({ guide }) {
   const copy = TEAM_COPY[guide.id] ?? { role: "Local guide", bio: "One of our licensed Cambodian guides." };
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-panel border border-border bg-surface transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/30 hover:shadow-soft">
+    <article className="group flex h-full flex-col">
       <div className="relative">
-        <div className="aspect-[16/10] overflow-hidden bg-surface-2">
+        <div className="aspect-[16/10] overflow-hidden rounded-card bg-surface-2">
           {guide.image && (
             <img
               src={guide.image}
@@ -186,15 +187,15 @@ function TeamCard({ guide }) {
             />
           )}
         </div>
-        <span className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" aria-hidden="true" />
+        <span className="absolute inset-0 rounded-card bg-gradient-to-t from-black/45 to-transparent" aria-hidden="true" />
         <span
-          className="absolute -bottom-7 left-6 grid size-16 place-items-center rounded-full border-4 border-surface bg-primary font-display text-xl font-semibold text-white shadow-soft"
+          className="absolute -bottom-7 left-5 grid size-16 place-items-center rounded-full border-4 border-background bg-primary font-display text-xl font-semibold text-white shadow-soft"
           aria-hidden="true"
         >
           {guide.initials}
         </span>
       </div>
-      <div className="flex flex-1 flex-col px-6 pb-6 pt-10">
+      <div className="flex flex-1 flex-col pt-10">
         <h3 className="font-display text-xl font-semibold tracking-[-0.02em] text-foreground">{guide.name}</h3>
         <p className="mt-1 text-sm font-semibold text-primary-ink">{copy.role}</p>
         <p className="mt-3 text-sm leading-relaxed text-pretty text-muted">{copy.bio}</p>
@@ -231,12 +232,12 @@ function Team({ team, loading, error, onRetry }) {
   return (
     <section id="team" aria-labelledby="about-team" className={cn(container, "scroll-mt-20 pt-24 sm:pt-32")}>
       <SectionHeading id="about-team" eyebrow="Meet the team" title="The people who'll show you around">
-        Every TourTrip guide is licensed, Cambodian and leads the tours they helped design.
+        Every TourTrip guide is licensed and Cambodian. They lead the tours they helped design at home, and travel with you as tour leader on International Escapes.
       </SectionHeading>
       {error ? (
         <EmptyState icon={UsersRound} title="We couldn't load the team" description="Please check your connection and try again." action={<Button onClick={onRetry}>Try again</Button>} />
       ) : (
-        <Reveal stagger as="ul" amount={0.1} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <Reveal stagger as="ul" amount={0.1} className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
           {loading
             ? Array.from({ length: 6 }, (_, index) => (
                 <li key={index}>

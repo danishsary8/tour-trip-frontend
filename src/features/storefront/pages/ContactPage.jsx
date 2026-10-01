@@ -75,14 +75,14 @@ function ContactForm() {
     : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -12 }, transition: { duration: 0.35, ease: motionEase } };
 
   return (
-    <div className="rounded-panel border border-border bg-surface p-6 shadow-soft sm:p-9">
+    <div className="rounded-panel border border-border bg-surface p-6 sm:p-9">
       <AnimatePresence mode="wait" initial={false}>
         {sent ? (
           <motion.div key="sent" {...swap} className="flex min-h-[460px] flex-col items-center justify-center text-center" role="status">
             <span className="grid size-16 place-items-center rounded-full bg-success/15 text-success-ink">
               <CheckCircle2 className="size-8" aria-hidden="true" />
             </span>
-            <h2 className="mt-6 font-display text-3xl font-semibold tracking-[-0.03em] text-foreground">Thanks, {sent.name} — message received</h2>
+            <h2 className="mt-6 font-display text-3xl font-semibold tracking-[-0.03em] text-foreground">Thanks, {sent.name}. Message received</h2>
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">
               We&apos;ll reply to <span className="font-semibold text-foreground">{sent.email}</span> within two working hours (8 am – 8 pm, Phnom Penh time).
             </p>
@@ -97,7 +97,7 @@ function ContactForm() {
               <h2 id={`${id}-title`} className="font-display text-2xl font-semibold tracking-[-0.03em] text-foreground sm:text-3xl">
                 Send us a message
               </h2>
-              <p className="mt-1.5 text-sm text-muted">Questions about a tour, a booking or a private trip — a real person reads every one.</p>
+              <p className="mt-1.5 text-sm text-muted">Questions about a tour, a booking or a private trip. A real person reads every one.</p>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
               <Field id={`${id}-name`} label="Your name" error={errors.name?.message}>
@@ -179,9 +179,9 @@ const infoLink =
 
 function ContactDetails() {
   return (
-    <Reveal stagger as="ul" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-      <RevealItem as="li" className="flex gap-4 rounded-panel border border-border bg-surface p-5">
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary-ink">
+    <Reveal stagger as="ul" className="grid border-t border-foreground/80 sm:grid-cols-2 sm:gap-x-8 lg:grid-cols-1">
+      <RevealItem as="li" className="flex gap-4 border-b border-border py-5">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full border border-primary/25 text-primary-ink">
           <Phone className="size-5" aria-hidden="true" />
         </span>
         <div className="min-w-0 text-sm">
@@ -198,8 +198,8 @@ function ContactDetails() {
           </p>
         </div>
       </RevealItem>
-      <RevealItem as="li" className="flex gap-4 rounded-panel border border-border bg-surface p-5">
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary-ink">
+      <RevealItem as="li" className="flex gap-4 border-b border-border py-5">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full border border-primary/25 text-primary-ink">
           <Mail className="size-5" aria-hidden="true" />
         </span>
         <div className="min-w-0 text-sm">
@@ -212,8 +212,8 @@ function ContactDetails() {
           <p className="mt-0.5 text-muted">Replies within 2 working hours</p>
         </div>
       </RevealItem>
-      <RevealItem as="li" className="flex gap-4 rounded-panel border border-border bg-surface p-5">
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary-ink">
+      <RevealItem as="li" className="flex gap-4 border-b border-border py-5">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full border border-primary/25 text-primary-ink">
           <MapPin className="size-5" aria-hidden="true" />
         </span>
         <address className="min-w-0 text-sm not-italic">
@@ -225,8 +225,8 @@ function ContactDetails() {
           ))}
         </address>
       </RevealItem>
-      <RevealItem as="li" className="flex gap-4 rounded-panel border border-border bg-surface p-5">
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary-ink">
+      <RevealItem as="li" className="flex gap-4 border-b border-border py-5">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full border border-primary/25 text-primary-ink">
           <Clock className="size-5" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1 text-sm">
@@ -305,8 +305,7 @@ function MapCard() {
 
 function WhatsappCard() {
   return (
-    <Reveal className="relative flex-1 overflow-hidden rounded-panel border border-white/10 bg-[#0b1215] p-6 text-white">
-      <span className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(37,211,102,.28),transparent_60%)]" aria-hidden="true" />
+    <Reveal className="dark relative flex-1 overflow-hidden rounded-panel bg-background p-6 text-white">
       <div className="relative flex h-full flex-col gap-4">
         <div className="flex items-center gap-3">
           <span className="grid size-11 place-items-center rounded-2xl bg-[#25d366] text-[#0b1215]">
@@ -317,12 +316,12 @@ function WhatsappCard() {
             <p className="text-xs text-white/70">Usually a reply within 15 minutes</p>
           </div>
         </div>
-        <p className="text-sm leading-relaxed text-white/80">Send a photo of your hotel, a voice note or a quick question — the way most of our guests already talk to us.</p>
+        <p className="text-sm leading-relaxed text-white/80">Send a photo of your hotel, a voice note or a quick question. It's how most of our guests already talk to us.</p>
         <a
           href={CONTACT.whatsappHref}
           target="_blank"
           rel="noreferrer"
-          className="mt-auto inline-flex items-center gap-2 self-start rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#1a1f21] outline-none transition-transform duration-300 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1215] active:translate-y-0"
+          className="mt-auto inline-flex items-center gap-2 self-start rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#1a1f21] outline-none transition-transform duration-300 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0"
         >
           Chat on WhatsApp <ArrowUpRight className="size-4" aria-hidden="true" />
           <span className="sr-only">(opens WhatsApp)</span>
@@ -334,7 +333,7 @@ function WhatsappCard() {
 
 function Socials() {
   return (
-    <Reveal className="rounded-panel border border-border bg-surface p-5">
+    <Reveal className="border-t border-foreground/80 pt-4">
       <p className="text-xs font-semibold uppercase tracking-wider text-muted">Follow the journey</p>
       <ul className="mt-3 grid grid-cols-2 gap-2">
         {SOCIAL_LINKS.map(({ label, handle, Icon }) => (
@@ -343,7 +342,7 @@ function Socials() {
             <a
               href="#"
               onClick={(event) => event.preventDefault()}
-              className="group flex items-center gap-3 rounded-card border border-border px-3 py-2.5 outline-none transition-[border-color,background-color] duration-300 hover:border-primary/40 hover:bg-primary/[0.06] focus-visible:ring-2 focus-visible:ring-accent/70"
+              className="group flex items-center gap-3 rounded-card px-2 py-2.5 outline-none transition-colors duration-300 hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-accent/70"
             >
               <Icon className="size-[18px] shrink-0 text-muted transition-colors group-hover:text-primary-ink" />
               <span className="min-w-0">
@@ -364,7 +363,7 @@ export default function ContactPage() {
   return (
     <>
       <PageIntro breadcrumbs={[{ label: "Contact" }]} eyebrow="Contact us" title="Talk to a real person in Phnom Penh">
-        Planning a trip, changing a booking or just wondering if the temples are busy in April? Message, call or drop by the office — we&apos;re two minutes from the Royal Palace.
+        Planning a trip, changing a booking or just wondering if the temples are busy in April? Message, call or drop by the office. We&apos;re two minutes from the Royal Palace.
       </PageIntro>
       <div className="mx-auto grid max-w-[1320px] gap-6 px-5 pb-24 sm:pb-32 lg:grid-cols-[1.25fr_1fr] lg:gap-8 lg:px-8">
         <Reveal>
