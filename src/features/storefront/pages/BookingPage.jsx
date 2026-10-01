@@ -143,8 +143,8 @@ function Wizard({ tour, schedules, settings, user, myBookings, params, setParams
         children,
         name: user.name,
         email: user.email,
-        // Pre-fill the phone from the traveller's most recent booking, if any.
-        phone: myBookings.find((item) => item.contactPhone)?.contactPhone ?? "",
+        // Pre-fill the phone from the traveller's most recent booking, else the one given at sign-up.
+        phone: myBookings.find((item) => item.contactPhone)?.contactPhone ?? user.phone ?? "",
         specialRequests: "",
       };
     })(),
