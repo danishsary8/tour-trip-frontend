@@ -2,6 +2,93 @@
 
 This file is append-only. Add new entries at the top of the log section without rewriting prior entries.
 
+## 2026-10-01 — Separate customer and admin login pages
+
+- Agent: Claude Code
+- Branch: `fix/login-pages-separation`, created from `feature/storefront-booking` at `100a80c`. That branch has **not** been merged yet (`origin/main` only has PR #1, storefront-reconcile), so this branch sits on top of it and should be merged after it. Pushed; not merged.
+
+### Investigation: who rendered what (before this branch)
+
+| Route | Component | What it showed |
+| --- | --- | --- |
+| `/admin/login` | `pages/auth/AdminLoginPage.jsx` inside `layouts/AuthLayout.jsx` | Hero slideshow (`components/effects/TextSlideshow` + `features/auth/authSlides.js`), admin stat chips (`MOCK_LOGIN_STATS`: 156 Tours / 2,358 Bookings / 4.8★), a `components/ui/FlipCard` whose front was sign-in → OTP (`features/auth/components/OtpVerificationForm`) and whose back was a 2-step **Create account** wizard (`features/auth/components/RegisterCardForm` → `signUp` in `features/auth/api.js`, posting to `/auth/register`). |
+| `/login` | `features/storefront/pages/CustomerLoginPage.jsx` in `features/storefront/auth/CustomerAuthShell.jsx` | Plain split layout, one static photo, `CustomerAuthContext.login`. |
+| `/register` | `features/storefront/pages/CustomerRegisterPage.jsx` in `CustomerAuthShell` | Single-step form, `CustomerAuthContext.register`. |
+| `/forgot-password` | `pages/customer/ForgotPassword.jsx` in `CustomerAuthShell` | Mock reset form. |
+| (unrouted) | `components/auth/LoginForm.jsx`, `components/auth/OtpVerifyForm.jsx`, `pages/public/auth/OtpVerifyPage.jsx`, `pages/public/auth/RegisterForm.jsx`, `services/authService.js` | Early "VoyageQuest" pages. Not imported anywhere. |
+
+Also found: logging out from the admin topbar, sidebar and command palette sent the admin to the **customer** `/login`.
+
+### Completed
+
+**Part A: customer `/login`, `/register`, `/forgot-password`**
+- `layouts/AuthLayout.jsx` moved to `features/storefront/auth/CustomerAuthLayout.jsx` (git mv). It keeps the crossfading destination slideshow, side arrows and glass card. It adds the storefront top bar ("Explore tours", "Back to home", or "Back to tour" when arriving from Book now) and exports `AuthCard`/`AuthKicker`. It is always dark (the `dark` class scopes the tokens) so the card reads over photos in either storefront theme.
+- Stat chips now speak to travellers and are computed from the shared mock data: happy travellers (completed-booking guests, rounded down to 50), tours in the catalogue, and the average approved review rating (`useAbout`, `useCatalog`). Currently 5,850+ / 10 / 4.6★.
+- `authSlides.js` moved to `features/storefront/auth/`. Copy written for operators ("Coordinate…", "Oversee…", "Curate…") and invented figures ("99.4% Satisfaction", "42 Pristine Bays", "2,350+ Travelers") were reworded for travellers.
+- Login is one step (email, password, remember me, forgot link) on `CustomerAuthContext.login`. Register keeps the 2-step wizard (`RegisterWizard.jsx`, from the old `RegisterCardForm`): credentials, then first/last name, phone, date of birth and terms. It is now wired to `CustomerAuthContext.register`. Focus moves to each step's heading. An "already exists" error jumps back to step 1 with values kept.
+- `CustomerAuthContext.register` takes an optional 4th `profile` argument (`{ phone, dob }`) stored on the mock account. Checkout pre-fills the phone from it when the traveller has no earlier booking.
+- `?redirect=` works through login, register (the links keep it) and the "Back to tour" link. `useBookingReturn` lives in `auth/redirect.js`.
+- Deleted `CustomerAuthShell.jsx`. The page files `CustomerLoginPage.jsx` / `CustomerRegisterPage.jsx` were rewritten in place (same routes, same lazy imports), so there was nothing else to repoint.
+
+**Part B: `/admin/login`**
+- New `features/auth/components/AdminAuthLayout.jsx`: no photos, a faint diamond lattice that fades from the centre, an "Admin console" label, a "Restricted access" chip, and an "Authorized staff only. Sign-in activity is recorded." footer. A compact 400 px card has a lock badge and a 2-segment step bar (Credentials, Verification).
+- `pages/auth/AdminLoginPage.jsx` rewritten: password, then the **existing** `OtpVerificationForm` (now with a `showIcon` prop), then `/admin` or the originally requested admin page. No sign-up, no Google button, no link to customer pages. "Forgot password?" swaps the card to "Contact your system administrator to reset your password…" with Back to sign in.
+- `features/auth/security.js` (mock):
+  - **Lockout:** per email in `localStorage['tourtrip.admin.loginGuard']`. Each failure says how many attempts are left. The 5th locks the email for 15 min, disables the password field and button, and shows "Too many attempts. Try again in 14:32", which ticks every second and survives reloads. A correct password clears the count.
+  - **Last login:** `rotateLastLogin` returns the previous sign-in `{ at, device }` (device parsed from the user agent, e.g. "Edge on Windows") and stores this one. The first sign-in in a browser gets a seeded one (two days earlier, 18:42, Safari on macOS). It is shown in the welcome toast (8 s) and in the topbar account menu.
+  - **Idle timeout:** `AuthContext` listens for pointer, key, wheel, touch and scroll events and writes `tourtrip.admin.lastActivity`, throttled to every 5 s. A check runs every 10 s and on tab focus; past 30 min it calls `logout("idle")`. `ProtectedRoute` then sends the admin to `/admin/login`, which shows "You were logged out due to inactivity." once. A session found idle on reload is dropped the same way.
+- Admin logout (topbar, sidebar, ⌘K) now goes to `/admin/login`.
+- Demo autofill on both login pages renders only when `import.meta.env.DEV` is true, and is labelled "Dev only". Checked: not present in the `vite preview` build.
+
+**Part C: cleanup**
+- Removed `signUp` from the admin auth adapter, the admin `registerSchema`, `MOCK_LOGIN_STATS`, and `components/ui/FlipCard.jsx`. All are unused now, and admin self-registration should not exist even as dead code.
+- Removed the unrouted legacy files listed above. Their images (`bg_login.jpg`, `otp_background.jpg`) stay because other pages still use them.
+- No links from customer auth pages to `/admin/*` or from the admin login to `/login` or `/register` (checked by grep and in the browser).
+- AGENTS.md Domain rules: admin accounts are never self-registered; admin login needs OTP, customer login doesn't; which layout each uses; the mock security rules. Commands: customer demo login and the dev-only autofill note.
+
+### Files
+
+- **New:** `features/auth/security.js`, `features/auth/components/AdminAuthLayout.jsx`
+- **Moved:** `layouts/AuthLayout.jsx` → `features/storefront/auth/CustomerAuthLayout.jsx`; `features/auth/authSlides.js` → `features/storefront/auth/authSlides.js`; `features/auth/components/RegisterCardForm.jsx` → `features/storefront/auth/RegisterWizard.jsx`
+- **Changed:** `pages/auth/AdminLoginPage.jsx`, `features/auth/{AuthContext.jsx, api.js, schema.js}`, `features/auth/components/OtpVerificationForm.jsx`, `features/storefront/auth/{CustomerAuthContext.jsx, redirect.js, schema.js}`, `features/storefront/pages/{CustomerLoginPage, CustomerRegisterPage, BookingPage}.jsx`, `pages/customer/ForgotPassword.jsx`, `components/effects/TextSlideshow.jsx` (slides now required), `components/layout/{Topbar, Sidebar, CommandPalette}.jsx`, `mocks/auth.js`, `AGENTS.md`
+- **Deleted:** `features/storefront/auth/CustomerAuthShell.jsx`, `components/ui/FlipCard.jsx`, `components/auth/{LoginForm, OtpVerifyForm}.jsx`, `pages/public/auth/{OtpVerifyPage, RegisterForm}.jsx`, `services/authService.js`
+
+### Commits
+
+- `dbd0ed0` feat(booking): prefill checkout phone from the registration profile
+- `5b8ad38` refactor(auth): move hero-carousel design to customer login/register
+- `149efed` feat(admin): add mock lockout, last-login and idle-timeout rules
+- `cb3a029` feat(admin): sign admins out after 30 minutes of inactivity
+- `eace81a` feat(admin): build a distinct console-style admin login with otp
+- `be6a06d` feat(admin): show last login in the account menu and log out to admin login
+- `4858b71` feat(admin): remove the admin self-registration api and flip card
+- `7be6fbc` fix(auth): remove orphaned legacy login, register and otp files
+- `docs: update agents domain rules, worklog and notes`
+
+### Verification
+
+- Every commit was checked out in a temporary worktree and passed `vite build` and `oxlint` (exit 0) on its own. Remaining lint warnings are pre-existing kinds (react-hook-form `watch`, context files exporting hooks).
+- Headless Edge (`puppeteer-core` in the scratchpad, not the project) against `vite preview`, with no console errors in any run:
+  - **Customer:** wrong password toast; Kampot "Book now" as a guest → `/login?redirect=/booking/kampot-adventure?date=…&adults=2` with the booking note and "Back to tour" → signed in → checkout with the date and 2 adults kept. Register via redirect: step 1 and step 2 validation, focus on the step heading, the existing email bounced to step 1 with the email kept, then a new email registered → checkout with the registered phone pre-filled. Forgot password validation and confirmation. 0 px horizontal overflow at 375 and 768 on all three pages.
+  - **Admin:** `/admin` while signed out → `/admin/login`. No images, links or sign-up text on the page. Forgot password message checked. Wrong attempts 1–4 show 4…1 left; the 5th shows "Try again in 15:00", which ticked 14:59 → 14:57 with both inputs disabled, and stayed locked after a reload. Another email is not locked. Once the lock expired, the correct password went to OTP and cleared the counter, and 123456 went to `/admin`. The toast showed "Last login: Tue 29 Sept, 18:42 · Safari on macOS" (seeded); the next login showed the real previous one ("Edge on Windows"), and the account menu shows the same line.
+  - **Idle:** with `lastActivity` set 31 minutes back, an open dashboard went to `/admin/login` with the inactivity notice within the 10 s check. The notice did not repeat on reload. Opening `/admin/bookings` with an idle session also redirected with the notice, and signing in returned to `/admin/bookings`. At 29 minutes, moving the mouse kept the admin signed in past the next check. Log out from the menu → `/admin/login`.
+- **Not checked:** real phones and screen readers; waiting a real 15 minutes or 30 minutes. Both were simulated by editing the stored timestamps.
+
+### Decisions
+
+- **Lockout counts per email, as asked.** It is a browser mock: anyone can clear localStorage. The Laravel API must enforce the lockout server-side (per account and per IP) and use one generic error message.
+- **Wrong OTP codes don't count toward the lockout.** Only password failures do. A real API should also limit OTP attempts.
+- **The idle timeout applies to "Remember me" sessions too.** Remember me now only keeps the session across a browser restart within the 30 minutes. The timeout can be shortened for testing with `localStorage['tourtrip.admin.idleTimeoutMs']` (milliseconds).
+- **The customer auth pages stay dark** in both storefront themes, because the form sits over photography. The admin login is forced dark as well.
+- **The customer demo autofill is now dev-only too.** It used to show in production builds. The credentials are in AGENTS.md and NOTES.
+- **"Forgot password" for admins is a message inside the card**, not a route, so there is no public admin reset URL to find.
+
+### Known issues
+
+- On phones the slideshow headline sits above the customer form, so the form starts below the first screen at 375 px. This is the same as the old admin layout; consider hiding the slide description under `lg`.
+- Register stores the date of birth as typed (DD/MM/YYYY text). The real API should take an ISO date.
+- The seeded "previous login" is fictional by design, so the first login in a new browser always shows it.
+
 ## 2026-10-01 — Phase 7c: Booking flow, My Bookings and final storefront pass
 
 - Agent: Claude Code
