@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -7,10 +7,10 @@ import { useEscapeLayer } from "../../../hooks/useEscapeLayer";
 import { useFocusTrap } from "../../../hooks/useFocusTrap";
 import { formatUsd } from "../../../lib/format";
 import { CANCELLATION_WINDOW } from "../content";
-import { seatTone, seatsLeft, upcomingSchedules } from "../booking";
+import { readableDeparture, seatTone, seatsLeft } from "../booking";
 
-const dateFormat = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
-const readableDate = (value) => dateFormat.format(new Date(`${value}T12:00:00Z`));
+const readableDate = readableDeparture;
+
 /** Traveller +/- stepper; also used by the booking wizard's details step. */
 export function Counter({ label, value, onChange, min, max }) {
   return <div className="flex items-center justify-between gap-4 py-3"><span className="text-sm font-medium text-foreground">{label}</span><div className="flex items-center gap-3">
@@ -51,17 +51,12 @@ function MobileSheet({ onClose, children }) {
     </motion.section></div>;
 }
 
-export function BookingCard({ tour, schedules, onBook }) {
-  const [selected, setSelected] = useState(null);
-  const [adults, setAdults] = useState(1);
-  const [childrenCount, setChildrenCount] = useState(0);
-  const [open, setOpen] = useState(false);
-  const future = upcomingSchedules(schedules);
-  const choose = (schedule) => { setSelected(schedule); if (adults + childrenCount > seatsLeft(schedule)) { setAdults(1); setChildrenCount(0); } };
-  const submit = () => { if (selected && seatsLeft(selected) >= adults + childrenCount) { setOpen(false); onBook({ date: selected.date, adults, children: childrenCount }); } };
+/** Sticky card on desktop; a bottom bar that opens a sheet below `lg`. */
+export function BookingCard({ tour, selection }) {
+  const { future, selected, choose, adults, setAdults, childrenCount, setChildrenCount, open, setOpen, submit } = selection;
   const props = { tour, schedules: future, selected, onSelect: choose, adults, setAdults, childrenCount, setChildrenCount, onBook: submit };
-  return <><aside aria-label="Book this tour" className="hidden self-start lg:sticky lg:top-24 lg:block"><div className="rounded-panel border border-border bg-surface p-6 shadow-panel"><Picker {...props} /></div></aside>
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 px-5 py-3 shadow-panel backdrop-blur-xl lg:hidden"><div className="mx-auto flex max-w-lg items-center justify-between gap-3"><div><p className="text-xs text-muted">From / person</p><p className="font-display text-xl font-semibold text-foreground">{formatUsd(tour.price)}</p></div><button type="button" onClick={() => setOpen(true)} className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white outline-none transition-all hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-accent active:scale-95">Choose date <ArrowRight className="ml-1 inline size-4" aria-hidden="true" /></button></div></div>
+  return <><aside aria-label="Book this tour" className="hidden self-start lg:sticky lg:top-[8.5rem] lg:block"><div className="rounded-panel border border-border bg-surface p-6 shadow-panel"><Picker {...props} /></div></aside>
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 px-5 py-3 shadow-panel backdrop-blur-xl lg:hidden"><div className="mx-auto flex max-w-lg items-center justify-between gap-3"><div><p className="text-xs text-muted">{selected ? readableDate(selected.date) : "From / person"}</p><p className="font-display text-xl font-semibold text-foreground">{formatUsd(tour.price)}</p></div><button type="button" onClick={() => setOpen(true)} className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white outline-none transition-all hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-accent active:scale-95">{selected ? "Choose travellers" : "Choose date"} <ArrowRight className="ml-1 inline size-4" aria-hidden="true" /></button></div></div>
     {createPortal(<AnimatePresence>{open && <MobileSheet onClose={() => setOpen(false)}><Picker {...props} /></MobileSheet>}</AnimatePresence>, document.body)}
   </>;
 }

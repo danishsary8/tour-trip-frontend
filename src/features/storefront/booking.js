@@ -17,6 +17,10 @@ const todayKey = () => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 };
 
+const departureDate = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+/** "Fri, Oct 9" for a departure date key. */
+export const readableDeparture = (value) => departureDate.format(new Date(`${value}T12:00:00Z`));
+
 export const seatsLeft = (schedule) => Math.max(0, schedule.capacity - schedule.seatsBooked);
 export const seatTone = (schedule) => (seatsLeft(schedule) === 0 ? "bg-danger" : schedule.seatsBooked / schedule.capacity >= 0.8 ? "bg-accent" : "bg-success");
 
