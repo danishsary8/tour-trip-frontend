@@ -99,6 +99,13 @@ export const PAYMENT_STATUSES = ["Unpaid", "Paid", "Refunded"];
 export const PAYMENT_METHODS = ["Cash", "Bank Transfer", "ABA Pay (Simulation)", "Credit Card (Simulation)"];
 export const REJECT_REASON = "Rejected by admin";
 
+/**
+ * Destinations carry a `country`. Cambodian provinces are the home market; "International
+ * Escapes" tours sit in destinations outside Cambodia, so every tour still has exactly one
+ * destination and its country comes from there (see `tour.country` below).
+ */
+export const HOME_COUNTRY = "Cambodia";
+
 export const DESTINATIONS = [
   { id: "siem-reap", name: "Siem Reap", province: "Siem Reap" },
   { id: "phnom-penh", name: "Phnom Penh", province: "Phnom Penh" },
@@ -106,7 +113,10 @@ export const DESTINATIONS = [
   { id: "sihanoukville", name: "Sihanoukville", province: "Preah Sihanouk" },
   { id: "kep", name: "Kep", province: "Kep" },
   { id: "battambang", name: "Battambang", province: "Battambang" },
-];
+  { id: "bali", name: "Bali", province: "Bali", country: "Indonesia" },
+  { id: "hanoi-ha-long", name: "Hanoi & Ha Long Bay", province: "Hanoi and Quảng Ninh", country: "Vietnam" },
+  { id: "kyoto", name: "Kyoto", province: "Kyoto Prefecture", country: "Japan" },
+].map((destination) => ({ country: HOME_COUNTRY, ...destination }));
 
 export const CATEGORIES = [
   { id: "temples", name: "Temples & Heritage" },
@@ -115,6 +125,7 @@ export const CATEGORIES = [
   { id: "island", name: "Island & Beach" },
   { id: "mountain", name: "Mountain & Hill Station" },
   { id: "food", name: "Food & Markets" },
+  { id: "international", name: "International Escapes" },
 ];
 
 export const GUIDES = [
@@ -138,7 +149,15 @@ export const TOURS = [
   { id: "siem-reap-street-food", name: "Siem Reap Street Food Night", destinationId: "siem-reap", categoryId: "food", price: 35, capacity: 12, guideId: "g-dara", image: coverOf("siem-reap-street-food"), weight: 6 },
   { id: "kep-rabbit-island", name: "Kep Crab Market & Rabbit Island", destinationId: "kep", categoryId: "island", price: 75, capacity: 16, guideId: "g-sreyleak", image: coverOf("kep-rabbit-island"), weight: 5 },
   { id: "battambang-countryside", name: "Battambang Countryside & Bamboo Train", destinationId: "battambang", categoryId: "adventure", price: 65, capacity: 16, guideId: "g-chenda", image: coverOf("battambang-countryside"), weight: 4 },
-].map((tour) => ({ ...tour, destination: DESTINATIONS.find((item) => item.id === tour.destinationId).name }));
+  // International Escapes (new). Weight 0 keeps the generated booking history, dashboard and
+  // reports exactly as before: these tours start with no past bookings and show as "New".
+  { id: "bali-highlands", name: "Bali Highlands & Rice Terraces", destinationId: "bali", categoryId: "international", price: 890, capacity: 12, guideId: "g-vanna", image: coverOf("bali-highlands"), weight: 0 },
+  { id: "hanoi-halong-bay", name: "Hanoi & Ha Long Bay Discovery", destinationId: "hanoi-ha-long", categoryId: "international", price: 640, capacity: 12, guideId: "g-dara", image: coverOf("hanoi-halong-bay"), weight: 0 },
+  { id: "kyoto-temples-gardens", name: "Kyoto Temples & Gardens", destinationId: "kyoto", categoryId: "international", price: 1380, capacity: 12, guideId: "g-sokha", image: coverOf("kyoto-temples-gardens"), weight: 0 },
+].map((tour) => {
+  const destination = DESTINATIONS.find((item) => item.id === tour.destinationId);
+  return { ...tour, destination: destination.name, country: destination.country };
+});
 
 const CUSTOMER_NAMES = [
   "Sophea Chan", "Dara Sok", "Sreymom Keo", "Vichea Pich", "Bopha Heng", "Ratha Sok", "Sreypov Nhem", "Kosal Chea",
@@ -509,6 +528,12 @@ function generate(now = new Date()) {
     { tourId: "koh-rong", inDays: 14, time: "09:00", seatsBooked: 18 },
     { tourId: "koh-rong", inDays: 20, time: "09:00", seatsBooked: 4 },
     { tourId: "kulen-mountain", inDays: 18, time: "07:30", seatsBooked: 4 },
+    { tourId: "hanoi-halong-bay", inDays: 16, time: "08:00", seatsBooked: 5 },
+    { tourId: "bali-highlands", inDays: 23, time: "09:00", seatsBooked: 7 },
+    { tourId: "kyoto-temples-gardens", inDays: 30, time: "10:00", seatsBooked: 3 },
+    { tourId: "hanoi-halong-bay", inDays: 37, time: "08:00", seatsBooked: 0 },
+    { tourId: "bali-highlands", inDays: 44, time: "09:00", seatsBooked: 2 },
+    { tourId: "kyoto-temples-gardens", inDays: 58, time: "10:00", seatsBooked: 0 },
   ].map((item, index) => {
     const tour = TOURS.find((entry) => entry.id === item.tourId);
     return {

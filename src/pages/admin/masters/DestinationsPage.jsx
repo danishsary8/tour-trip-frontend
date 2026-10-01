@@ -22,11 +22,11 @@ const field = "w-full rounded-control border border-border bg-surface-2/40 px-3.
 
 function DestinationForm({ item, onSave }) {
   const { register, handleSubmit, setValue, control, formState: { errors } } = useForm({ resolver: zodResolver(destinationSchema), defaultValues: {
-    name: item?.name ?? "", province: item?.province ?? "", description: item?.description ?? "", image: item?.image ?? PHOTOS[0], status: item?.status ?? "Active",
+    name: item?.name ?? "", province: item?.province ?? "", country: item?.country ?? "Cambodia", description: item?.description ?? "", image: item?.image ?? PHOTOS[0], status: item?.status ?? "Active",
   } });
   const image = useWatch({ control, name: "image" });
   return <form id="destination-form" onSubmit={handleSubmit(onSave)} className="space-y-5">
-    {[["name", "Name", "e.g. Kratie"], ["province", "Province", "e.g. Kratie"]].map(([key, label, placeholder]) => <div key={key}>
+    {[["name", "Name", "e.g. Kratie"], ["province", "Province or region", "e.g. Kratie"], ["country", "Country", "e.g. Cambodia"]].map(([key, label, placeholder]) => <div key={key}>
       <label htmlFor={`destination-${key}`} className="mb-1.5 block text-sm font-semibold">{label}</label>
       <input id={`destination-${key}`} {...register(key)} placeholder={placeholder} className={field} aria-invalid={Boolean(errors[key])} />
       {errors[key] && <p role="alert" className="mt-1 text-xs text-danger-ink">{errors[key].message}</p>}
@@ -78,7 +78,7 @@ export default function DestinationsPage() {
         {query.isLoading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{[0,1,2,3,4,5].map((n) => <Skeleton key={n} className="h-80 rounded-card" />)}</div> : shown.length === 0 ? <EmptyState title="No destinations found" description="Try a different search or add a destination." /> :
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{shown.map((item) => <motion.article key={item.id} layout={reduced ? false : "position"} initial={reduced ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="group overflow-hidden rounded-card border border-border bg-surface shadow-soft transition-colors hover:border-primary/35">
             <div className="relative h-44 overflow-hidden"><img src={item.image} alt={item.name} className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" /><span className="absolute left-4 top-4"><StatusBadge status={item.status} /></span></div>
-            <div className="p-4"><div className="flex items-start justify-between gap-2"><div><h2 className="font-display text-lg font-semibold">{item.name}</h2><p className="mt-1 flex items-center gap-1 text-sm text-muted"><MapPin className="size-3.5" /> {item.province}</p></div><RowActions row={item} onEdit={(record) => { setEditing(record); setDrawerOpen(true); }} onDelete={(record) => startDelete([record])} onToggle={(record) => onStatus(record, record.status === "Active" ? "Inactive" : "Active")} /></div>
+            <div className="p-4"><div className="flex items-start justify-between gap-2"><div><h2 className="font-display text-lg font-semibold">{item.name}</h2><p className="mt-1 flex items-center gap-1 text-sm text-muted"><MapPin className="size-3.5" /> {item.country && item.country !== "Cambodia" ? `${item.province}, ${item.country}` : item.province}</p></div><RowActions row={item} onEdit={(record) => { setEditing(record); setDrawerOpen(true); }} onDelete={(record) => startDelete([record])} onToggle={(record) => onStatus(record, record.status === "Active" ? "Inactive" : "Active")} /></div>
               <p className="mt-3 line-clamp-2 min-h-10 text-sm text-muted">{item.description}</p><p className="mt-4 border-t border-border pt-3 text-xs font-semibold text-primary-ink">{item.tourCount} {item.tourCount === 1 ? "tour" : "tours"}</p></div>
           </motion.article>)}</div>}</>}
     <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title={editing ? "Edit destination" : "Add destination"} description="Places guests can discover on TourTrip."

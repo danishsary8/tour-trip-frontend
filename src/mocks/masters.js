@@ -1,4 +1,4 @@
-import { CATEGORIES, DESTINATIONS, GUIDES, TOURS, dashboardDb } from "./dashboard";
+import { CATEGORIES, DESTINATIONS, GUIDES, HOME_COUNTRY, TOURS, dashboardDb } from "./dashboard";
 
 const categoryDetails = [
   ["Ancient temples, living history and Khmer heritage.", "Landmark"],
@@ -7,11 +7,14 @@ const categoryDetails = [
   ["Island stays and Cambodia's southern coast.", "Waves"],
   ["Cooler highlands and scenic hill stations.", "Trees"],
   ["Street food, night markets and Khmer flavours.", "UtensilsCrossed"],
+  ["Small-group journeys beyond Cambodia, led by a TourTrip tour leader.", "Plane"],
 ];
 
 CATEGORIES.forEach((item, index) => Object.assign(item, { description: categoryDetails[index][0], icon: categoryDetails[index][1], status: "Active" }));
 DESTINATIONS.forEach((item) => Object.assign(item, {
-  description: `${item.name} welcomes guests with a memorable mix of Cambodian landscapes and local life.`,
+  description: item.country === "Cambodia"
+    ? `${item.name} welcomes guests with a memorable mix of Cambodian landscapes and local life.`
+    : `${item.name}, ${item.country}: a small-group International Escape led by a TourTrip tour leader.`,
   // First active catalogue tour in each destination keeps Home and Masters imagery aligned.
   image: (TOURS.find((tour) => tour.destinationId === item.id) ?? TOURS[5]).image,
   status: "Active",
@@ -23,8 +26,8 @@ GUIDES.forEach((item, index) => Object.assign(item, {
   status: "Active",
 }));
 TOURS.forEach((item, index) => Object.assign(item, {
-  durationDays: [1, 1, 3, 2, 1, 1, 1, 1, 1, 1][index] ?? 1,
-  description: `Discover ${item.destination} with an experienced local guide on a carefully paced TourTrip journey.`,
+  durationDays: [1, 1, 3, 2, 1, 1, 1, 1, 1, 1, 5, 4, 5][index] ?? 1,
+  description: `Discover ${item.destination} with an experienced ${item.country === "Cambodia" ? "local guide" : "TourTrip tour leader"} on a carefully paced TourTrip journey.`,
   itinerary: [{ title: "Meet your guide", description: "Welcome, orientation and the first local highlights." }],
   included: ["Local guide", "Transport", "Drinking water"],
   excluded: ["Personal expenses", "Travel insurance"],
@@ -72,12 +75,13 @@ export function findMaster(domain, id) {
 function normalize(domain, data) {
   if (domain === "tours") {
     const destination = DESTINATIONS.find((item) => item.id === data.destinationId);
-    return { ...data, destination: destination?.name ?? "", image: data.coverImage ?? data.gallery?.[0] ?? "", weight: data.weight ?? 0 };
+    return { ...data, destination: destination?.name ?? "", country: destination?.country ?? HOME_COUNTRY, image: data.coverImage ?? data.gallery?.[0] ?? "", weight: data.weight ?? 0 };
   }
   if (domain === "schedules") {
     const tour = TOURS.find((item) => item.id === data.tourId);
     return { ...data, tourName: tour?.name ?? "", destination: tour?.destination ?? "", image: tour?.image ?? "", guide: GUIDES.find((item) => item.id === tour?.guideId) ?? null, seatsBooked: data.seatsBooked ?? 0 };
   }
+  if (domain === "destinations") return { ...data, country: data.country?.trim() || HOME_COUNTRY };
   return data;
 }
 

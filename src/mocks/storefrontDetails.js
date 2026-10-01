@@ -78,6 +78,44 @@ const STORIES = {
     itinerary: [{ title: "Bamboo train and rural life", description: "Meet your guide in town, ride the bamboo train, visit countryside workshops and return via quiet village roads." }],
     included: ["Local guide", "Bamboo-train ride", "Transport and drinking water"], excluded: ["Lunch", "Personal purchases"],
   },
+  "bali-highlands": {
+    overview: "Bali's interior is cooler, greener and quieter than its beaches. Five unhurried days take you from Ubud's rice terraces up into the lake country around Bedugul, with a TourTrip tour leader travelling with you from Phnom Penh and a Balinese guide on the ground.",
+    meetingPoint: "Ngurah Rai International Airport, Denpasar",
+    itinerary: [
+      { title: "Arrive in Ubud", description: "Airport pickup, transfer to a family-run guesthouse in Ubud and a welcome dinner." },
+      { title: "Tegallalang at first light", description: "Walk the terraces before the heat, learn how the subak irrigation system shares water between farms, then free afternoon in Ubud." },
+      { title: "Temples and water", description: "Visit the spring temple of Tirta Empul and a coffee plantation on the way up to the highlands." },
+      { title: "Lake Beratan", description: "Morning at Pura Ulun Danu Beratan on the lake shore, then a walk through the Bedugul market and botanic garden." },
+      { title: "Return to Denpasar", description: "Slow breakfast in the hills and transfer back to the airport for your flight home." },
+    ],
+    included: ["TourTrip tour leader from Phnom Penh", "Local Balinese guide", "4 nights' guesthouse stay", "Daily breakfast and two dinners", "All transfers in Bali", "Temple entry fees"],
+    excluded: ["Flights to and from Bali", "Indonesian visa on arrival", "Lunches and drinks", "Travel insurance"],
+  },
+  "hanoi-halong-bay": {
+    overview: "Start in Hanoi's Old Quarter, where every street once belonged to a single trade, then head to the coast for a night on Ha Long Bay. The pace is gentle and the group small, with a TourTrip tour leader and a Vietnamese guide throughout.",
+    meetingPoint: "Noi Bai International Airport, Hanoi",
+    itinerary: [
+      { title: "Hanoi arrival", description: "Airport pickup, check in near Hoan Kiem Lake and an evening walk around the Turtle Tower." },
+      { title: "The Old Quarter", description: "Morning street-food walk, the Temple of Literature, and coffee on train street when the line is quiet." },
+      { title: "To Ha Long Bay", description: "Drive to the coast and board a traditional junk; kayak among the limestone islands and stay overnight on the bay." },
+      { title: "Ti Top and back", description: "Sunrise from the deck, a climb to the Ti Top Island viewpoint, then return to Hanoi for your flight." },
+    ],
+    included: ["TourTrip tour leader from Phnom Penh", "Local Vietnamese guide", "2 hotel nights in Hanoi", "1 night aboard a Ha Long Bay junk", "Daily breakfast, all meals on the bay", "Transfers and kayaking"],
+    excluded: ["Flights to and from Hanoi", "Vietnamese e-visa", "Lunches and dinners in Hanoi", "Travel insurance"],
+  },
+  "kyoto-temples-gardens": {
+    overview: "Kyoto rewards early starts. This five-day route reaches the famous places before the crowds, then slows down for tea, gardens and the old wooden streets of Gion. A TourTrip tour leader travels with you and a licensed Kyoto guide joins each day.",
+    meetingPoint: "Kyoto Station (from Kansai International Airport)",
+    itinerary: [
+      { title: "Into Kyoto", description: "Meet at Kansai Airport, take the train to Kyoto and settle into a ryokan-style inn near Gion." },
+      { title: "Fushimi Inari", description: "Climb the torii-lined trails of Fushimi Inari in the cool of the morning, then a sake brewery in Fushimi." },
+      { title: "Higashiyama and Gion", description: "Kiyomizu-dera, the stone lanes of Sannenzaka and an evening walk past Hōkan-ji and the teahouses of Gion." },
+      { title: "Arashiyama", description: "The bamboo grove at opening time, Tenryū-ji's garden and a slow lunch by the Katsura river." },
+      { title: "Departure", description: "Free morning for a tea ceremony or the Nishiki market, then the train back to Kansai Airport." },
+    ],
+    included: ["TourTrip tour leader from Phnom Penh", "Licensed Kyoto guide each day", "4 nights in a ryokan-style inn", "Daily breakfast and two dinners", "Kansai airport rail transfers", "Temple and garden entry fees"],
+    excluded: ["Flights to and from Osaka (Kansai)", "Lunches and drinks", "Personal purchases", "Travel insurance"],
+  },
 };
 
 export function tourStory(tour, guide) {

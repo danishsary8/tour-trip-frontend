@@ -4,7 +4,7 @@
  * data, which the dashboard also uses), popularity from the shared bookings store and
  * ratings from the reviews store. This file only adds storefront presentation copy.
  */
-import { dashboardDb, toKey, addDays } from "../../mocks/dashboard";
+import { HOME_COUNTRY, dashboardDb, toKey, addDays } from "../../mocks/dashboard";
 import { mastersDb } from "../../mocks/masters";
 import { getReviewsDb } from "../../mocks/reviews";
 import { TOUR_PHOTOS } from "../../mocks/tourImages";
@@ -21,6 +21,9 @@ const TOUR_COPY = {
   "siem-reap-street-food": { tagline: "Night markets, grilled skewers and num banh chok by tuk-tuk with a local foodie.", duration: "Evening · 4 hours" },
   "kep-rabbit-island": { tagline: "Fresh crab with Kampot pepper at the market, then a lazy afternoon on Rabbit Island.", duration: "Full day" },
   "battambang-countryside": { tagline: "Ride the bamboo train through green fields, meet local makers and explore Battambang's slower rhythms.", duration: "Full day" },
+  "bali-highlands": { tagline: "Walk the Tegallalang rice terraces at first light, then cross the cool highlands to the lake temple of Ulun Danu Beratan.", duration: "5 days · 4 nights" },
+  "hanoi-halong-bay": { tagline: "Old Quarter mornings and train-street coffee in Hanoi, then a night aboard a junk among Ha Long Bay's limestone islands.", duration: "4 days · 3 nights" },
+  "kyoto-temples-gardens": { tagline: "Climb through Fushimi Inari's vermilion gates, wander Gion at dusk and walk the bamboo grove at Arashiyama before the crowds.", duration: "5 days · 4 nights" },
 };
 
 /** Short descriptions for the Home destination cards. */
@@ -31,6 +34,9 @@ const DESTINATION_COPY = {
   sihanoukville: "Gateway to Koh Rong's beaches",
   kep: "Crab markets and island afternoons",
   battambang: "Bamboo trains, creative makers and countryside",
+  bali: "Rice terraces, lake temples and highland villages",
+  "hanoi-ha-long": "Old Quarter streets and a night on Ha Long Bay",
+  kyoto: "Shrines, gardens and the bamboo grove at Arashiyama",
 };
 
 const POPULAR_WINDOW_DAYS = 90;
@@ -67,6 +73,8 @@ export function publicTours() {
       name: tour.name,
       destination: tour.destination,
       destinationId: tour.destinationId,
+      country: tour.country ?? HOME_COUNTRY,
+      international: (tour.country ?? HOME_COUNTRY) !== HOME_COUNTRY,
       category: categories.get(tour.categoryId)?.name ?? "",
       categoryId: tour.categoryId,
       price: tour.price,
@@ -104,6 +112,8 @@ export function publicDestinations() {
       id: destination.id,
       name: destination.name,
       province: destination.province,
+      country: destination.country ?? HOME_COUNTRY,
+      international: (destination.country ?? HOME_COUNTRY) !== HOME_COUNTRY,
       image: destination.image,
       blurb: DESTINATION_COPY[destination.id] ?? destination.description,
       tourCount: tours.filter((tour) => tour.destinationId === destination.id).length,
