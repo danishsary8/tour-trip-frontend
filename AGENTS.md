@@ -97,6 +97,10 @@ The sidebar, breadcrumbs and command palette follow this order (`src/components/
 - Booking status: `Pending`, `Confirmed`, `Completed`, `Cancelled`. "Reject" is `Cancelled` with reason `Rejected by admin`.
 - Payment status: `Unpaid`, `Paid`, `Refunded`.
 - Payment methods (exactly): `Cash`, `Bank Transfer`, `ABA Pay (Simulation)`, `Credit Card (Simulation)`.
+- Checkout: `Cash` and `Bank Transfer` create the booking as `Pending`/`Unpaid` (awaiting admin confirmation). `ABA Pay (Simulation)` and `Credit Card (Simulation)` simulate instant processing and create it as `Confirmed`/`Paid`. Checkout offers only the methods enabled in admin Settings → Payment methods.
+- Admin accounts are never self-registered — only customers can register. Admin login requires OTP; customer login does not.
+- Customer auth pages (`/login`, `/register`, `/forgot-password`) use `CustomerAuthLayout` in `features/storefront/auth/`; `/admin/login` uses `AdminAuthLayout` in `features/auth/components/`. Neither links to the other.
+- Admin security (mock, `features/auth/security.js`): 5 wrong passwords lock that email for 15 minutes; 30 minutes without input signs the admin out; the previous login time and device show after sign-in.
 - There is no standalone Payments page. Payments live in Bookings and Reports.
 - Currency: USD (`formatUsd` in `src/lib/format.js`).
 - Mock income is counted on the day money is received: online methods at booking time, cash on the tour day.
@@ -129,3 +133,5 @@ Email: admin@tourtrip.com
 Password: Admin@123
 OTP: 123456
 ```
+
+Mock customer: `customer@tourtrip.com` / `Customer@123`. Demo-credential autofill buttons render only when `import.meta.env.DEV` is true.

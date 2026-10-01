@@ -1,7 +1,9 @@
 /**
  * Deterministic mock reviews dataset for TourTrip Cambodia.
  * ~26 reviews spanning Cambodia tours with realistic feedback and varied ratings.
+ * Reviews written by travellers on the storefront are kept in localStorage (see persistence.js).
  */
+import { MOCK_KEYS, onStoredChange, readJson, writeJson } from "./persistence";
 
 function addDays(date, days) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
@@ -301,6 +303,43 @@ function createReviewsStore() {
 /** In-memory store that survives re-renders during the user's browser session. */
 let reviewsDb = createReviewsStore();
 
+/* Traveller reviews: saved on submit and after every admin moderation, replayed on load. */
+const isCustomerReview = (review) => review?.source === "storefront";
+
+function saveCustomerReviews() {
+  writeJson(MOCK_KEYS.reviews, reviewsDb.filter(isCustomerReview));
+}
+
+function applyStoredReviews(stored) {
+  if (!Array.isArray(stored)) return;
+  reviewsDb = [...stored.filter((review) => review?.id), ...reviewsDb.filter((review) => !isCustomerReview(review))];
+}
+
+applyStoredReviews(readJson(MOCK_KEYS.reviews, []));
+onStoredChange(MOCK_KEYS.reviews, "reviews", applyStoredReviews);
+
+/** A traveller's review of a completed booking. Starts Pending until an admin approves it. */
+export function addCustomerReviewToDb({ bookingId, customerName, tourName, rating, comment }) {
+  if (reviewsDb.some((review) => review.bookingId === bookingId)) throw new Error("You've already reviewed this trip");
+  const now = new Date();
+  const review = {
+    id: `rev-${bookingId.toLowerCase()}`,
+    bookingId,
+    customerName,
+    tourName,
+    rating,
+    comment,
+    status: "Pending",
+    createdAt: now.toISOString(),
+    dateKey: toKey(now),
+    initials: initialsOf(customerName),
+    source: "storefront",
+  };
+  reviewsDb.unshift(review);
+  saveCustomerReviews();
+  return { ...review };
+}
+
 export function getReviewsDb() {
   return reviewsDb.map((review) => ({ ...review }));
 }
@@ -314,6 +353,7 @@ export function updateReviewStatusInDb(id, nextStatus) {
   if (!review) throw new Error(`Review ${id} not found`);
   const previousStatus = review.status;
   review.status = nextStatus;
+  if (isCustomerReview(review)) saveCustomerReviews();
   return { review: { ...review }, previousStatus };
 }
 
@@ -321,6 +361,7 @@ export function deleteReviewFromDb(id) {
   const index = reviewsDb.findIndex((item) => item.id === id);
   if (index === -1) throw new Error(`Review ${id} not found`);
   const [removed] = reviewsDb.splice(index, 1);
+  if (isCustomerReview(removed)) saveCustomerReviews();
   return { review: removed, index };
 }
 
@@ -328,6 +369,7 @@ export function restoreReviewInDb(id, snapshotStatus) {
   const review = reviewsDb.find((item) => item.id === id);
   if (!review) throw new Error(`Review ${id} not found`);
   review.status = snapshotStatus;
+  if (isCustomerReview(review)) saveCustomerReviews();
   return { review: { ...review } };
 }
 

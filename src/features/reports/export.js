@@ -8,6 +8,9 @@
  *   summary: [["Total income", 12345, "usd"], ...],
  *   tables: [{ name, columns: [{ header, key, format }], rows }],
  * }
+ * PDF-only extras (used by the booking invoice): `kicker` replaces "TOURTRIP · ADMIN REPORT",
+ * `meta` replaces the "Exported … · Mock data" line, `notes` are paragraphs printed after the
+ * tables, and `datedFilename: false` saves as `<filename>.pdf` without the date suffix.
  * Formats: "text" (default), "count", "usd", "percent" (0–100), "signedPercent", "rating" (0–5 or null), "date" (YYYY-MM-DD).
  */
 
@@ -111,14 +114,14 @@ export async function exportReportPdf(report) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...primary);
-  doc.text("TOURTRIP · ADMIN REPORT", margin, 34);
+  doc.text(report.kicker ?? "TOURTRIP · ADMIN REPORT", margin, 34);
   doc.setFontSize(20);
   doc.setTextColor(26, 31, 33);
   doc.text(report.title, margin, 60);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(107, 114, 117);
-  doc.text(`${report.subtitle} · Exported ${timestamp()} · Mock data`, margin, 78);
+  doc.text(`${report.subtitle} · ${report.meta ?? `Exported ${timestamp()} · Mock data`}`, margin, 78);
 
   // Summary figures in a two-column grid.
   let y = 104;
@@ -169,5 +172,20 @@ export async function exportReportPdf(report) {
     y = doc.lastAutoTable.finalY + 32;
   }
 
-  doc.save(`${report.filename}-${timestamp()}.pdf`);
+  if (report.notes?.length) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(74, 82, 85);
+    for (const note of report.notes) {
+      const lines = doc.splitTextToSize(note, pageWidth - margin * 2);
+      if (y + lines.length * 13 > doc.internal.pageSize.getHeight() - 50) {
+        doc.addPage();
+        y = 50;
+      }
+      doc.text(lines, margin, y);
+      y += lines.length * 13 + 8;
+    }
+  }
+
+  doc.save(report.datedFilename === false ? `${report.filename}.pdf` : `${report.filename}-${timestamp()}.pdf`);
 }

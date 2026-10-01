@@ -5,7 +5,7 @@ import { Button } from "../../../components/ui/Button";
 
 const OTP_LENGTH = 6;
 
-export function OtpVerificationForm({ email, loading, success, error, onVerify, onResend, onBack }) {
+export function OtpVerificationForm({ email, loading, success, error, onVerify, onResend, onBack, showIcon = true }) {
   const [digits, setDigits] = useState(Array(OTP_LENGTH).fill(""));
   const [seconds, setSeconds] = useState(30);
   const inputs = useRef([]);
@@ -75,9 +75,11 @@ export function OtpVerificationForm({ email, loading, success, error, onVerify, 
       className="space-y-6"
     >
       <div>
-        <div className="mb-5 grid size-12 place-items-center rounded-2xl border border-accent/25 bg-accent/10 text-accent shadow-[inset_0_1px_rgba(255,255,255,.12)]">
-          <ShieldCheck className="size-6" />
-        </div>
+        {showIcon && (
+          <div className="mb-5 grid size-12 place-items-center rounded-2xl border border-accent/25 bg-accent/10 text-accent shadow-[inset_0_1px_rgba(255,255,255,.12)]">
+            <ShieldCheck className="size-6" />
+          </div>
+        )}
         <p className="text-sm leading-relaxed text-white/55">
           Enter the 6-digit security code sent to <span className="font-medium text-white/85">{email}</span>
         </p>

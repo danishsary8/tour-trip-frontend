@@ -78,7 +78,7 @@ export function PaymentReport({ range }) {
         cell: ({ getValue }) => <span className="block max-w-[180px] truncate">{getValue()}</span>,
       },
       { accessorKey: "bookingDate", header: "Booked", enableGlobalFilter: false, cell: ({ getValue }) => <span className="whitespace-nowrap text-muted">{formatDate(getValue())}</span> },
-      { accessorKey: "paymentMethod", header: "Method", enableGlobalFilter: false, filterFn: "equalsString", cell: ({ getValue }) => <span className="whitespace-nowrap text-muted">{getValue()}</span> },
+      { accessorKey: "paymentMethod", header: "Method", enableGlobalFilter: false, filterFn: "equalsString", cell: ({ getValue }) => <span className="whitespace-nowrap text-muted">{getValue() ?? "Not chosen"}</span> },
       { accessorKey: "paymentStatus", header: "Payment", enableGlobalFilter: false, enableSorting: false, filterFn: "equalsString", cell: ({ getValue }) => <StatusBadge status={getValue()} /> },
       { accessorKey: "status", header: "Booking", enableGlobalFilter: false, enableSorting: false, filterFn: "equalsString", meta: { className: "hidden xl:table-cell" }, cell: ({ getValue }) => <StatusBadge status={getValue()} /> },
       { accessorKey: "amount", header: "Amount", enableGlobalFilter: false, cell: ({ getValue }) => <span className="font-semibold tabular-nums">{formatUsd(getValue())}</span> },

@@ -109,7 +109,7 @@ function ProfileCard({ rail, profile }) {
 
   function handleLogout() {
     logout();
-    navigate("/login", { replace: true });
+    navigate("/admin/login", { replace: true });
   }
 
   const avatar = (

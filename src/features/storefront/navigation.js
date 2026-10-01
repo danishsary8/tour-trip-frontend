@@ -35,6 +35,6 @@ export const ALL_STOREFRONT_NAV = [...STOREFRONT_NAV, ...STOREFRONT_SECONDARY_NA
 export const ACCOUNT_LINKS = {
   signIn: "/login",
   register: "/register",
-  bookings: "/account/bookings",
+  bookings: "/my-bookings",
   wishlist: "/wishlist",
 };

@@ -1,10 +1,10 @@
-## 2026-09-30 — The storefront now feels like a complete travel site
+## 2026-10-01 — Customer and admin logins are now separate
 
-- New pages: **About** (`/about`: our story, the guide team and real numbers), **Contact** (`/contact`: a form that validates, plus phone, WhatsApp, a map and opening hours), **FAQ** (`/faq`: 12 answers you can search) and a friendly **404** for any wrong link.
-- The header now has a **More** menu (Gallery, Reviews, About, Contact, FAQ), and every guest page has breadcrumbs.
-- Home adds a **Why book with us** section and an **EXPLORE10** early-booking banner under the search bar (click the code to copy it; the discount itself isn't applied yet).
-- The footer is bigger: link columns, a newsletter sign-up, and trust badges with the four payment methods. A round **chat button** at the bottom right opens WhatsApp, phone and email options.
-- Fixed: the Reviews page was showing reviews still waiting for approval. It now shows only approved ones (4.6★ from 14).
-- To try: open any fake URL like `/oops`, send the contact form empty and then filled in, search "refund" on the FAQ, and switch to dark mode.
-- **Your decision:** the brief said free cancellation up to 48 hours, but Settings says 3 days, so the site says 72 hours everywhere. Should we change the setting to 2 days, or keep 72 hours?
-- Note: this branch doesn't include the Tour Detail or customer login work yet (those branches aren't merged), so Battambang still shows "Coming soon".
+- **What changed:** the photo slideshow sign-in now belongs to customers (`/login`, `/register`, `/forgot-password`). Login is a single step; registration is two steps. `/admin/login` is a plain, dark "admin console" page: password, then the 6-digit code. It has no way to create an account, and "Forgot password" says to contact the system administrator.
+- **Try the lockout:** at `/admin/login`, enter `admin@tourtrip.com` with a wrong password 5 times. The form locks and counts down from 15:00, even after a reload. To unlock early, clear the site data in the browser.
+- **Try the inactivity logout:** sign in (Admin@123, code 123456), then in DevTools run `localStorage.setItem("tourtrip.admin.idleTimeoutMs", "60000")` and leave the mouse and keyboard alone. About a minute later you're sent back to the login page with "You were logged out due to inactivity." Remove that key to go back to 30 minutes.
+- **Last login:** after signing in, the welcome message and the account menu (top right) show the previous sign-in time and browser. The first sign-in in a new browser shows a made-up one.
+- Customer demo: `customer@tourtrip.com` / `Customer@123`. The "Dev only" fill buttons only appear when running `npm run dev`.
+- **Please decide:**
+  - Merge `feature/storefront-booking` first; this branch is built on it.
+  - Should the lockout also count wrong 6-digit codes, and should "Remember me" skip the inactivity logout? Right now neither happens.

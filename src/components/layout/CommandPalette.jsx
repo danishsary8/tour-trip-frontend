@@ -180,7 +180,7 @@ function PalettePanel({ onClose }) {
                 onSelect={() =>
                   run(() => {
                     logout();
-                    navigate("/login", { replace: true });
+                    navigate("/admin/login", { replace: true });
                   })
                 }
               >

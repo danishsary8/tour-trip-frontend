@@ -44,7 +44,8 @@ export function FloatingContact() {
   const reduceMotion = useReducedMotion();
   const { open, toggle, close, triggerRef, panelRef } = usePopover();
   const firstRef = useRef(null);
-  const onTourPage = /^\/tours\/[^/]+/.test(location.pathname);
+  // Tour Detail and checkout have a sticky price bar at the bottom below lg.
+  const onTourPage = /^\/(tours|booking)\/[^/]+/.test(location.pathname);
   const online = open && isOfficeOpen();
 
   useEffect(() => {

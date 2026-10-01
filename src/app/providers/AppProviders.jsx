@@ -2,6 +2,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import "../../lib/chart";
+import { MockSyncBridge } from "./MockSyncBridge";
 import { ThemeProvider, useTheme } from "./ThemeProvider";
 import { AuthProvider } from "../../features/auth/AuthContext";
 import { CustomerAuthProvider } from "../../features/storefront/auth/CustomerAuthContext";
@@ -38,6 +39,7 @@ export function AppProviders({ children }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <MockSyncBridge />
       <ThemeProvider>
         <AuthProvider>
           <CustomerAuthProvider>

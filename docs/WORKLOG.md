@@ -2,6 +2,250 @@
 
 This file is append-only. Add new entries at the top of the log section without rewriting prior entries.
 
+## 2026-10-01 — Separate customer and admin login pages
+
+- Agent: Claude Code
+- Branch: `fix/login-pages-separation`, created from `feature/storefront-booking` at `100a80c`. That branch has **not** been merged yet (`origin/main` only has PR #1, storefront-reconcile), so this branch sits on top of it and should be merged after it. Pushed; not merged.
+
+### Investigation: who rendered what (before this branch)
+
+| Route | Component | What it showed |
+| --- | --- | --- |
+| `/admin/login` | `pages/auth/AdminLoginPage.jsx` inside `layouts/AuthLayout.jsx` | Hero slideshow (`components/effects/TextSlideshow` + `features/auth/authSlides.js`), admin stat chips (`MOCK_LOGIN_STATS`: 156 Tours / 2,358 Bookings / 4.8★), a `components/ui/FlipCard` whose front was sign-in → OTP (`features/auth/components/OtpVerificationForm`) and whose back was a 2-step **Create account** wizard (`features/auth/components/RegisterCardForm` → `signUp` in `features/auth/api.js`, posting to `/auth/register`). |
+| `/login` | `features/storefront/pages/CustomerLoginPage.jsx` in `features/storefront/auth/CustomerAuthShell.jsx` | Plain split layout, one static photo, `CustomerAuthContext.login`. |
+| `/register` | `features/storefront/pages/CustomerRegisterPage.jsx` in `CustomerAuthShell` | Single-step form, `CustomerAuthContext.register`. |
+| `/forgot-password` | `pages/customer/ForgotPassword.jsx` in `CustomerAuthShell` | Mock reset form. |
+| (unrouted) | `components/auth/LoginForm.jsx`, `components/auth/OtpVerifyForm.jsx`, `pages/public/auth/OtpVerifyPage.jsx`, `pages/public/auth/RegisterForm.jsx`, `services/authService.js` | Early "VoyageQuest" pages. Not imported anywhere. |
+
+Also found: logging out from the admin topbar, sidebar and command palette sent the admin to the **customer** `/login`.
+
+### Completed
+
+**Part A: customer `/login`, `/register`, `/forgot-password`**
+- `layouts/AuthLayout.jsx` moved to `features/storefront/auth/CustomerAuthLayout.jsx` (git mv). It keeps the crossfading destination slideshow, side arrows and glass card. It adds the storefront top bar ("Explore tours", "Back to home", or "Back to tour" when arriving from Book now) and exports `AuthCard`/`AuthKicker`. It is always dark (the `dark` class scopes the tokens) so the card reads over photos in either storefront theme.
+- Stat chips now speak to travellers and are computed from the shared mock data: happy travellers (completed-booking guests, rounded down to 50), tours in the catalogue, and the average approved review rating (`useAbout`, `useCatalog`). Currently 5,850+ / 10 / 4.6★.
+- `authSlides.js` moved to `features/storefront/auth/`. Copy written for operators ("Coordinate…", "Oversee…", "Curate…") and invented figures ("99.4% Satisfaction", "42 Pristine Bays", "2,350+ Travelers") were reworded for travellers.
+- Login is one step (email, password, remember me, forgot link) on `CustomerAuthContext.login`. Register keeps the 2-step wizard (`RegisterWizard.jsx`, from the old `RegisterCardForm`): credentials, then first/last name, phone, date of birth and terms. It is now wired to `CustomerAuthContext.register`. Focus moves to each step's heading. An "already exists" error jumps back to step 1 with values kept.
+- `CustomerAuthContext.register` takes an optional 4th `profile` argument (`{ phone, dob }`) stored on the mock account. Checkout pre-fills the phone from it when the traveller has no earlier booking.
+- `?redirect=` works through login, register (the links keep it) and the "Back to tour" link. `useBookingReturn` lives in `auth/redirect.js`.
+- Deleted `CustomerAuthShell.jsx`. The page files `CustomerLoginPage.jsx` / `CustomerRegisterPage.jsx` were rewritten in place (same routes, same lazy imports), so there was nothing else to repoint.
+
+**Part B: `/admin/login`**
+- New `features/auth/components/AdminAuthLayout.jsx`: no photos, a faint diamond lattice that fades from the centre, an "Admin console" label, a "Restricted access" chip, and an "Authorized staff only. Sign-in activity is recorded." footer. A compact 400 px card has a lock badge and a 2-segment step bar (Credentials, Verification).
+- `pages/auth/AdminLoginPage.jsx` rewritten: password, then the **existing** `OtpVerificationForm` (now with a `showIcon` prop), then `/admin` or the originally requested admin page. No sign-up, no Google button, no link to customer pages. "Forgot password?" swaps the card to "Contact your system administrator to reset your password…" with Back to sign in.
+- `features/auth/security.js` (mock):
+  - **Lockout:** per email in `localStorage['tourtrip.admin.loginGuard']`. Each failure says how many attempts are left. The 5th locks the email for 15 min, disables the password field and button, and shows "Too many attempts. Try again in 14:32", which ticks every second and survives reloads. A correct password clears the count.
+  - **Last login:** `rotateLastLogin` returns the previous sign-in `{ at, device }` (device parsed from the user agent, e.g. "Edge on Windows") and stores this one. The first sign-in in a browser gets a seeded one (two days earlier, 18:42, Safari on macOS). It is shown in the welcome toast (8 s) and in the topbar account menu.
+  - **Idle timeout:** `AuthContext` listens for pointer, key, wheel, touch and scroll events and writes `tourtrip.admin.lastActivity`, throttled to every 5 s. A check runs every 10 s and on tab focus; past 30 min it calls `logout("idle")`. `ProtectedRoute` then sends the admin to `/admin/login`, which shows "You were logged out due to inactivity." once. A session found idle on reload is dropped the same way.
+- Admin logout (topbar, sidebar, ⌘K) now goes to `/admin/login`.
+- Demo autofill on both login pages renders only when `import.meta.env.DEV` is true, and is labelled "Dev only". Checked: not present in the `vite preview` build.
+
+**Part C: cleanup**
+- Removed `signUp` from the admin auth adapter, the admin `registerSchema`, `MOCK_LOGIN_STATS`, and `components/ui/FlipCard.jsx`. All are unused now, and admin self-registration should not exist even as dead code.
+- Removed the unrouted legacy files listed above. Their images (`bg_login.jpg`, `otp_background.jpg`) stay because other pages still use them.
+- No links from customer auth pages to `/admin/*` or from the admin login to `/login` or `/register` (checked by grep and in the browser).
+- AGENTS.md Domain rules: admin accounts are never self-registered; admin login needs OTP, customer login doesn't; which layout each uses; the mock security rules. Commands: customer demo login and the dev-only autofill note.
+
+### Files
+
+- **New:** `features/auth/security.js`, `features/auth/components/AdminAuthLayout.jsx`
+- **Moved:** `layouts/AuthLayout.jsx` → `features/storefront/auth/CustomerAuthLayout.jsx`; `features/auth/authSlides.js` → `features/storefront/auth/authSlides.js`; `features/auth/components/RegisterCardForm.jsx` → `features/storefront/auth/RegisterWizard.jsx`
+- **Changed:** `pages/auth/AdminLoginPage.jsx`, `features/auth/{AuthContext.jsx, api.js, schema.js}`, `features/auth/components/OtpVerificationForm.jsx`, `features/storefront/auth/{CustomerAuthContext.jsx, redirect.js, schema.js}`, `features/storefront/pages/{CustomerLoginPage, CustomerRegisterPage, BookingPage}.jsx`, `pages/customer/ForgotPassword.jsx`, `components/effects/TextSlideshow.jsx` (slides now required), `components/layout/{Topbar, Sidebar, CommandPalette}.jsx`, `mocks/auth.js`, `AGENTS.md`
+- **Deleted:** `features/storefront/auth/CustomerAuthShell.jsx`, `components/ui/FlipCard.jsx`, `components/auth/{LoginForm, OtpVerifyForm}.jsx`, `pages/public/auth/{OtpVerifyPage, RegisterForm}.jsx`, `services/authService.js`
+
+### Commits
+
+- `dbd0ed0` feat(booking): prefill checkout phone from the registration profile
+- `5b8ad38` refactor(auth): move hero-carousel design to customer login/register
+- `149efed` feat(admin): add mock lockout, last-login and idle-timeout rules
+- `cb3a029` feat(admin): sign admins out after 30 minutes of inactivity
+- `eace81a` feat(admin): build a distinct console-style admin login with otp
+- `be6a06d` feat(admin): show last login in the account menu and log out to admin login
+- `4858b71` feat(admin): remove the admin self-registration api and flip card
+- `7be6fbc` fix(auth): remove orphaned legacy login, register and otp files
+- `docs: update agents domain rules, worklog and notes`
+
+### Verification
+
+- Every commit was checked out in a temporary worktree and passed `vite build` and `oxlint` (exit 0) on its own. Remaining lint warnings are pre-existing kinds (react-hook-form `watch`, context files exporting hooks).
+- Headless Edge (`puppeteer-core` in the scratchpad, not the project) against `vite preview`, with no console errors in any run:
+  - **Customer:** wrong password toast; Kampot "Book now" as a guest → `/login?redirect=/booking/kampot-adventure?date=…&adults=2` with the booking note and "Back to tour" → signed in → checkout with the date and 2 adults kept. Register via redirect: step 1 and step 2 validation, focus on the step heading, the existing email bounced to step 1 with the email kept, then a new email registered → checkout with the registered phone pre-filled. Forgot password validation and confirmation. 0 px horizontal overflow at 375 and 768 on all three pages.
+  - **Admin:** `/admin` while signed out → `/admin/login`. No images, links or sign-up text on the page. Forgot password message checked. Wrong attempts 1–4 show 4…1 left; the 5th shows "Try again in 15:00", which ticked 14:59 → 14:57 with both inputs disabled, and stayed locked after a reload. Another email is not locked. Once the lock expired, the correct password went to OTP and cleared the counter, and 123456 went to `/admin`. The toast showed "Last login: Tue 29 Sept, 18:42 · Safari on macOS" (seeded); the next login showed the real previous one ("Edge on Windows"), and the account menu shows the same line.
+  - **Idle:** with `lastActivity` set 31 minutes back, an open dashboard went to `/admin/login` with the inactivity notice within the 10 s check. The notice did not repeat on reload. Opening `/admin/bookings` with an idle session also redirected with the notice, and signing in returned to `/admin/bookings`. At 29 minutes, moving the mouse kept the admin signed in past the next check. Log out from the menu → `/admin/login`.
+- **Not checked:** real phones and screen readers; waiting a real 15 minutes or 30 minutes. Both were simulated by editing the stored timestamps.
+
+### Decisions
+
+- **Lockout counts per email, as asked.** It is a browser mock: anyone can clear localStorage. The Laravel API must enforce the lockout server-side (per account and per IP) and use one generic error message.
+- **Wrong OTP codes don't count toward the lockout.** Only password failures do. A real API should also limit OTP attempts.
+- **The idle timeout applies to "Remember me" sessions too.** Remember me now only keeps the session across a browser restart within the 30 minutes. The timeout can be shortened for testing with `localStorage['tourtrip.admin.idleTimeoutMs']` (milliseconds).
+- **The customer auth pages stay dark** in both storefront themes, because the form sits over photography. The admin login is forced dark as well.
+- **The customer demo autofill is now dev-only too.** It used to show in production builds. The credentials are in AGENTS.md and NOTES.
+- **"Forgot password" for admins is a message inside the card**, not a route, so there is no public admin reset URL to find.
+
+### Known issues
+
+- On phones the slideshow headline sits above the customer form, so the form starts below the first screen at 375 px. This is the same as the old admin layout; consider hiding the slide description under `lg`.
+- Register stores the date of birth as typed (DD/MM/YYYY text). The real API should take an ISO date.
+- The seeded "previous login" is fictional by design, so the first login in a new browser always shows it.
+
+## 2026-10-01 — Phase 7c: Booking flow, My Bookings and final storefront pass
+
+- Agent: Claude Code
+- Branch: `feature/storefront-booking`, created from `origin/feature/storefront-reconcile` at `e264943` (the remote had moved four commits past the local copy; it was fast-forwarded first). Pushed; not merged.
+
+### Completed
+
+**Shared data (the admin and the storefront read the same records)**
+- `features/bookings/api.js` gained the customer side of the shared store: `getMyBookings`, `createBooking`, `payBooking` and `cancelMyBooking`. They write to `dashboardDb.bookings`, the same records `/admin/bookings`, the dashboard, Reports and Customers read. Hooks (`useMyBookings`, `useCreateBooking`, `usePayBooking`, `useCancelMyBooking`) reuse the admin cache refresh.
+- A customer is matched to the admin customer directory by email. The first booking of a newly registered customer adds them to the directory.
+- New domain rule, added to AGENTS.md: Cash and Bank Transfer create Pending/Unpaid; ABA Pay (Simulation) and Credit Card (Simulation) process instantly and become Confirmed/Paid. Checkout reads the enabled methods from admin Settings.
+- **Demo traveller.** `customer@tourtrip.com` (Sophea Meas) now has five seeded trips in `mocks/dashboard.js`: two Completed and Paid (Angkor Wat, Phnom Penh), one Cancelled, one Confirmed and Paid by card (Koh Rong, 20 days out), and one Pending bank transfer (Kulen, 18 days out). Every My Bookings tab and both cancel paths have data.
+- **Cross-tab persistence (mock only, `mocks/persistence.js`).** Storefront bookings, traveller reviews and admin settings are saved to localStorage and replayed on load. A `storage` listener plus `app/providers/MockSyncBridge.jsx` refetch the affected queries in other open tabs, so a booking made in one tab appears on a freshly loaded `/admin/bookings`, and disabling a payment method removes it from an open checkout. Admin changes to storefront bookings and reviews are saved too. Checkout bookings hold seats on their departure until they are cancelled.
+- Reviews: `addCustomerReviewToDb` and `submitReview` add a Pending review linked to its booking, which goes into the existing Reviews Management queue. There is one review per booking.
+- Admin tweaks for bookings that have no payment method yet: the drawer select shows "Not chosen yet", the method-change history note handles null, and the Payment report cell reads "Not chosen".
+
+**Part A: `/booking/:tourId` (replaces `BookingStubPage`)**
+- A 4-step wizard (`pages/BookingPage.jsx`, `components/booking/*`) with the admin Tour wizard's stepper language: one bar per step that fills (animated scaleX), numbered labels that turn into checks, "01 / 04" kicker, and a slide between steps. Focus moves to each new step's heading.
+- **Step 1, Your details** (react-hook-form + zod `bookingDetailsSchema`):
+  - Departure picker, using the same seat bars as Tour Detail.
+  - Adults and children counters, pre-filled from the Tour Detail query params, editable and clamped to the seats left.
+  - Lead traveller name and email from the account, and phone from the traveller's latest booking.
+  - Special requests (500 characters, with a counter).
+- **Step 2, Review & confirm:** tour card; date, traveller, contact and request cards, each with an Edit link back to step 1 (values are kept); and the price breakdown. **Confirm booking** creates the record (Pending/Unpaid, no method yet) with a real `TT-` id and puts `?booking=<id>` in the URL. A refresh then resumes at payment or confirmation instead of booking twice.
+- **Step 3, Payment:** only the methods enabled in Settings, shown as cards using the Settings fields (cash instructions, bank name/account/number plus the booking reference, ABA merchant ID, card statement descriptor). A "Simulation" tag marks ABA Pay and Credit Card. A required 72-hour cancellation-policy checkbox gates the button.
+  - Cash and Bank Transfer: "Confirm order" records the method and a history note, and the booking stays Pending/Unpaid.
+  - Online methods: "Pay $X now" runs about 1.7 s of processing, using the login's loading→success button, then the booking becomes Confirmed/Paid.
+- **Step 4, Confirmation:** the success tick draws itself (gold for reserved, green for paid, no confetti), a large booking number with copy, next-step copy ("Your booking is reserved, please complete payment to confirm", plus bank details for transfers), a mock "Confirmation email sent to …" banner, and a summary card. It has **Download invoice**, **View my booking** (`/my-bookings?booking=<id>`) and **Continue exploring**.
+- **Invoice:** `features/bookings/invoice.js` builds a report description for the **existing Reports jsPDF exporter**. `exportReportPdf` gained optional `kicker`, `meta`, `notes` and `datedFilename`, so there is still one export setup. The PDF holds the booking ID, statuses, travel date and time, travellers, method, contact, the price breakdown table, what to pay or refund, the policy and contact details.
+- **Page states:** skeleton while tour, settings and bookings load; an invalid tour id shows "We couldn't find that tour"; a load error has Retry; an unknown `?booking=` shows a not-found state.
+- **Layout:** the price sidebar is sticky at `lg` and matches the Tour Detail card; below `lg` a sticky total bar sits at the bottom, and the floating contact button lifts above it.
+
+**Part B: `/my-bookings` (replaces the sample `CustomerBookingsPage`; `/account/bookings` redirects)**
+- **Page:** stat tiles (upcoming, next departure, completed) and the shared `Tabs` (All, Upcoming, Completed, Cancelled, with counts; `?tab=`). Cards show the photo, name, id, date and time, travellers, total, the status and payment badges, and a one-line "what next" note.
+- **Actions on each card:** Choose payment (resumes checkout), Write a review, View details, Invoice, Cancel.
+- **Detail drawer (`?booking=`):** the confirmation summary plus a traveller-worded history timeline, and the same actions.
+- **Cancel:** available for Pending and Confirmed bookings. The dialog asks for a reason (Change of plans / Found a better option / Emergency / Other; Other needs details). A Paid booking shows "A refund of $X will be processed to your original payment method (…) within 5–7 business days" and becomes Cancelled/Refunded; an Unpaid one cancels with no refund copy. The reason and refund are written to `statusHistory`, so admin sees them.
+- **Reviews:** Completed bookings unlock **Write a review** (star rating as native radios, comment of 20–1000 characters). It submits Pending and toasts "Thanks! Your review is awaiting approval." Tour Detail's button is now live for a signed-in traveller with a completed, unreviewed booking of that tour. Otherwise it says why it is locked: sign in, complete this tour first, or already submitted.
+- **Page states:** skeletons; an empty account shows "No trips booked yet" with Browse Tours; an empty tab shows "Show all bookings"; a load error has Retry.
+
+**Part C: final pass**
+- The header profile menu and mobile menu now point to `/my-bookings` (`ACCOUNT_LINKS`).
+- Removed the remaining placeholder states:
+  - the Google "coming soon" buttons on login and register;
+  - the `/account/:mode` "next release" copy (it now only redirects);
+  - Tour Detail's "No payment is taken in this preview" (it now shows the free-cancellation line).
+  - The legacy `/booking` route (a teammate page offering PayPal/"card") now redirects to `/tours`; the file is kept.
+
+### Files
+
+- **New:**
+  - `mocks/persistence.js`, `app/providers/MockSyncBridge.jsx`, `features/bookings/invoice.js`
+  - `features/storefront/booking.js`, `features/storefront/components/FormField.jsx`
+  - `features/storefront/components/booking/{BookingStepper, PriceSummary, SuccessCheck, DetailsStep, ReviewStep, PaymentStep, ConfirmationStep, BookingSummary, MyBookingCard, BookingDetailDrawer, CancelBookingDialog, ReviewDialog}.jsx` and `styles.js`
+  - `features/storefront/pages/{BookingPage, MyBookingsPage}.jsx`
+- **Changed:**
+  - `mocks/{dashboard, reviews}.js`
+  - `features/bookings/{api, hooks}.js`, `features/bookings/components/BookingDrawer.jsx`
+  - `features/reviews/{api, hooks}.js`, `features/settings/api.js`
+  - `features/reports/export.js`, `features/reports/components/PaymentReport.jsx`
+  - `features/storefront/{schema, navigation}.js`
+  - `features/storefront/components/{BookingCard, FloatingContact, TourReviews, TourSections}.jsx`
+  - `features/storefront/pages/{TourDetailPage, AccountPage, CustomerLoginPage, CustomerRegisterPage}.jsx`
+  - `routes/{storefront, public}.routes.jsx`, `app/providers/AppProviders.jsx`, `AGENTS.md`
+- **Removed:** `features/storefront/pages/{BookingStubPage, CustomerBookingsPage}.jsx`. Both were placeholders this phase was asked to replace.
+
+### Commits
+
+- `c0edce3` feat(mocks): seed a demo traveller and share customer-side changes across tabs
+- `3a13590` feat(bookings): add customer create, pay and cancel on the shared store
+- `a74b863` feat(reviews): accept pending reviews from travellers
+- `3348902` feat(booking): add booking wizard shell pieces and step 1 details form
+- `42c5cbb` feat(booking): add review and confirm step with live price breakdown
+- `a0d2c4f` feat(booking): add payment step with enabled-methods logic and simulation
+- `d62bd13` feat(booking): add confirmation step with pdf invoice download
+- `f1db7ad` feat(booking): replace the booking stub with the checkout wizard
+- `39121f5` feat(my-bookings): add cancel booking flow with refund messaging
+- `51c19c3` feat(my-bookings): add review dialog for completed trips
+- `0964d5d` feat(my-bookings): add booking detail view and invoice download
+- `a4d2c61` feat(my-bookings): add bookings list with status filters
+- `77219b1` feat(my-bookings): unlock review submission for completed bookings
+- `2779b4a` fix(storefront): final end-to-end sanity pass
+- `docs: update worklog and note for danish`
+
+### Verification
+
+- **Per-commit builds:** every commit above (except the docs commit) was checked out in a temporary worktree and passed `vite build` and `oxlint` on its own. The final `npm run build` passes and `npm run lint` exits 0; the only warnings are pre-existing kinds.
+- **Scripted browser checks:** headless Edge via `puppeteer-core`, installed in the scratchpad and not in the project, against `vite preview`. There were no console errors in any run.
+  - **Cash path:** guest `/booking/kampot-adventure` → `/login?redirect=…` → back with the travellers kept. Contact was pre-filled, the Edit round trip kept the date, and TT-24641 was created Pending/Unpaid. Only enabled methods were offered (Cash, Bank Transfer, ABA Pay; Credit Card is off by default). Pay stays disabled until a method is chosen and the policy is ticked. Confirmation showed "reserved" and the email banner, and the invoice PDF (4.4 KB) was opened and checked field by field.
+  - **Card path:** Credit Card was enabled through the real `/admin/settings` Payment tab; checkout then listed it. Paying showed the processing line and then "You're all set!". A freshly loaded `/admin/bookings` row read "Paid Confirmed".
+  - **Disabling a method:** turning Cash off in admin removed it from the next checkout. A booking abandoned before payment shows Unpaid/Pending in admin, and its drawer shows "Not chosen yet".
+  - **My Bookings:** tabs All 5 / Upcoming 2 / Completed 2 / Cancelled 1.
+    - Cancelling the paid Koh Rong trip showed the reason validation, then the "$320 … Credit Card … 5–7 business days" refund copy; admin showed "Refunded Cancelled".
+    - Cancelling the unpaid Kulen trip showed no refund copy; admin showed "Unpaid Cancelled".
+    - The Angkor review toasted "Thanks! Your review is awaiting approval.", and admin Reviews listed it as Pending 5.0. The Tour Detail button then read "Review submitted" on Angkor and "Write a review" on Phnom Penh.
+  - **End to end by clicking:** Home → Tours → Kampot → date + 2 adults → Book now (guest) → login → review → confirm → ABA Pay → confirmation. A reload stays on the confirmation. View my booking opened the drawer, cancelling with "Other" required details and then refunded, and the profile menu's My bookings link goes to `/my-bookings`. `/booking/not-a-tour` shows the not-found state.
+  - **Responsive:** the booking page, My Bookings and the detail drawer at 375, 768, 1280 and 1920, in light and dark, with 0 px horizontal overflow. All four steps were also completed at 375 (Bank Transfer).
+- **Not checked:** real touch devices and screen readers.
+
+### Decisions
+
+- **Children pay the per-person price at checkout.** Tour Detail and the FAQ already say so, so storefront bookings store `childPrice = unitPrice`. The generated admin history still uses 60% child prices. **Danish to decide** which rule the API should follow.
+- **Paid bookings follow the 72-hour promise.** Outside the window they cancel online with a full refund. Inside it, the Cancel button is disabled and explains that the traveller should contact the team (the FAQ promises no refund inside the window). Unpaid bookings can be cancelled until departure.
+- **The booking is created on "Confirm booking"**, before a method is chosen (`paymentMethod: null`), as the brief asked. If the traveller stops there, My Bookings offers "Choose payment", which resumes the wizard.
+- **Cross-tab persistence is localStorage,** and only for the records both sides touch. Without it, the admin in another tab could never see a customer booking. It sits under `src/mocks/` and disappears with the API.
+- **Removed the Google buttons** rather than keep a dead "coming soon" action. Re-add them with real OAuth (for example Laravel Socialite).
+- **The invoice reuses the Reports exporter** (Helvetica, Latin-1). The file name is `tourtrip-invoice-<id>.pdf`.
+- **Admin Settings stays the source of truth** for payment methods. Credit Card starts disabled in the mock settings, so it has to be switched on in admin to test the card path.
+
+### Known issues
+
+- Mock data still regenerates on reload. Only storefront bookings, traveller reviews and settings persist, per browser, under `tourtrip.mock.*` keys. Clear those keys (or site data) to reset the demo. Booking ids are only unique within one browser's data.
+- The `EXPLORE10` promo banner is still display-only; checkout has no promo-code field.
+- Social profile links in the footer and on Contact are still `#` placeholders until real accounts exist.
+- The floating contact button can cover the lower-right corner of a payment card at 375 px until you scroll.
+- Legacy teammate routes outside the flow (`/explore`, `/trips/:id`, `/tour/detail`) are untouched and not linked from the storefront.
+- An earlier local tweak (lazy-loading the stub's image) was stashed at the start ("local booking stub lazy-img tweak"). The same change was already on the remote, and the stub is now gone, so the stash can be dropped.
+
+### Next steps
+
+Frontend is feature-complete for the Guest/Customer/Admin flows defined in the flow diagrams. Everything runs on mock data. Backend (Laravel API) development begins next — each features/*/api.js file is the integration point where mock functions get swapped for real HTTP calls.
+
+## 2026-09-30 — Storefront reconciliation: Parts C & D (Guest Flow Audit & Polish)
+
+- Agent: Antigravity
+- Branch: `feature/storefront-reconcile`
+
+### Part C — Guest Flow Audit Results
+
+1. **Home page (`/`): PASS** — Hero search dispatches destination, date, and traveller parameters to `/tours`; category cards link with `?category=`; destination bento grid links to `/tours?destination=` with Battambang active; featured tours render `TourCard` with direct detail page links; testimonials carousel renders approved traveller reviews with autoplay, pause-on-hover, keyboard navigation, and touch swipe.
+2. **Search & Tour Listing (`/tours`): PASS** — All filters (destination, category, dual-slider price bounds, day/multi duration, 4.0/4.5+ star ratings) and sort options (popular, price asc/desc, rating) verified. Normalized filter matching in `filters.js` and `ToursPage.jsx` so hyphenated slugs (`siem-reap`), natural spaced names (`Siem Reap`), and mixed casing all resolve flawlessly. Active filter chips are individually removable and Clear all resets the query. Empty state displays with a clear "Clear filters" recovery action.
+3. **Tour Detail (`/tours/:id`): PASS** — Photo gallery with responsive aspect ratio and full-featured Lightbox (ArrowLeft/ArrowRight, Escape key, touch swipe). All four content tabs (Overview, Itinerary with expandable day accordions, Included/Excluded checklist, Reviews with rating breakdown chart) render smoothly. Real-time departure picker respects seat availability (sold-out departures disabled, color-coded seat tones). Adults and children counters calculate total price live and enforce capacity limits. Related tours render with shared `TourCard`.
+4. **Book Now logged out hop: PASS** — Clicking "Book now" while logged out captures the selected departure date, adult count, and child count into query parameters and forwards the guest to `/login?redirect=/booking/:tourId?date=...&adults=...&children=...` via `authPath()`.
+5. **Customer Login redirect: PASS** — Signing in with `customer@tourtrip.com` / `Customer@123` succeeds, verifies credentials with the mock service, shows a welcome toast, and safely navigates back to the booking stub with all query parameters intact.
+6. **Customer Registration redirect: PASS** — Registering a new mock user validates with Zod, automatically creates the session, signs the user in, shows a welcome toast, and safely redirects back to `/booking/:tourId?date=...&adults=...&children=...`.
+7. **Continue Browsing pages: PASS** —
+   - `/destinations`: Grid of all 6 Cambodian provinces with dynamically computed tour counts from the shared catalogue (Siem Reap: 4, Kampot: 2, Phnom Penh: 1, Sihanoukville: 1, Kep: 1, Battambang: 1); clicking a card links to `/tours?destination=`.
+   - `/gallery`: Filter chips by destination and travel style with live counts, interactive hover cards, empty state, and shared Lightbox.
+   - `/reviews`: Aggregate rating score, interactive 5★-1★ distribution bars with click-to-filter, star/destination/tour filters, sorting, verified traveller cards, and empty state.
+8. **Wishlist smoke test: PASS** — Heart button on `TourCard` toggles saved status; header count badge updates live across tabs and pages; guests persist in `localStorage` under `wishlist` and fold into customer account on sign in; `/wishlist` displays saved tours with an empty state linking back to `/tours`.
+
+### Part D — Return-Visit Polish & Audits
+
+- **D1: Recently Viewed Strip** — Updated `recentlyViewed.js` to persist under `recentlyViewed` in `localStorage` (while maintaining compatibility with `tourtrip.recentlyViewed`). Renders on Home below Featured Tours with a responsive 3-column desktop grid showing up to 6 viewed tours without arbitrary truncation.
+- **D2: Site-Wide Empty State Audit** — Audited all 10 pages and views using `EmptyState` (`ToursPage`, `TourDetailPage`, `WishlistPage`, `DestinationsPage`, `GalleryPage`, `ReviewsPage`, `AboutPage`, `FaqPage`, `NotFoundPage`, `CustomerBookingsPage`). Confirmed 0 dead-end states: every single empty state provides clear action buttons or links to recover.
+- **D3: Below-the-Fold Lazy Loading Audit** — Verified all below-fold images use `loading="lazy"` and `decoding="async"` across `TourCard`, `HomeSections`, `DestinationsPage`, `GalleryPage`, `AboutPage`, `CustomerBookingsPage`, and `BookingStubPage`.
+- **D4: Responsive Check at 375px and 1280px** — Confirmed no horizontal scrollbar or element overflow at 375px (mobile) and 1280px (desktop). Navigation, drawers, popovers, and sticky booking cards adapt smoothly.
+
+### Verification
+
+- `npm run lint`: Completed with 0 errors across 269 files.
+- `npm run build`: Completed with 0 errors in ~3.2s.
+
+### Next Steps (Phase 7c)
+
+Phase 7c will implement the production booking flow (`/booking/:tourId` review & confirm, payment processing simulation, booking confirmation voucher), "My Bookings" management, and booking cancellation, building upon the reconciled customer auth and state architecture.
+
 ## 2026-09-30 — Storefront reconciliation, Part B
 
 - Audited the wishlist implementation already present in the squashed snapshot: the shared `TourCard` owns one accessible heart toggle, guests persist an array of tour ids under the `wishlist` localStorage key, and saved state survives navigation and reloads.

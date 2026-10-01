@@ -83,11 +83,20 @@ export function applyFilters(tours, filters) {
   const duration = DURATION_OPTIONS.find((option) => option.value === filters.duration)?.test;
   const minRating = filters.rating ? Number(filters.rating) : null;
 
+  const matchFilter = (selected, id, name) => {
+    if (!selected.length) return true;
+    const idNorm = id?.toLowerCase();
+    const nameNorm = name?.toLowerCase();
+    const idSlug = idNorm?.replace(/ /g, "-");
+    const idSpaced = idNorm?.replace(/-/g, " ");
+    return selected.some((item) => item === idNorm || item === nameNorm || item === idSlug || item === idSpaced);
+  };
+
   const matches = tours.filter(
     (tour) =>
       (!query || `${tour.name} ${tour.destination} ${tour.category} ${tour.tagline}`.toLowerCase().includes(query)) &&
-      (!filters.destination.length || filters.destination.includes(tour.destinationId)) &&
-      (!filters.category.length || filters.category.includes(tour.categoryId)) &&
+      matchFilter(filters.destination, tour.destinationId, tour.destination) &&
+      matchFilter(filters.category, tour.categoryId, tour.category) &&
       (filters.min === null || tour.price >= filters.min) &&
       (filters.max === null || tour.price <= filters.max) &&
       (!duration || duration(tour.durationDays)) &&

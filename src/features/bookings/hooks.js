@@ -4,8 +4,12 @@ import { REJECT_REASON } from "../../mocks/dashboard";
 import {
   STATUS_ACTIONS,
   bulkConfirmBookings,
+  cancelMyBooking,
+  createBooking,
   decideBooking,
   getBookings,
+  getMyBookings,
+  payBooking,
   restoreBooking,
   updateBookingPayment,
   updateBookingStatus,
@@ -141,3 +145,27 @@ export function useBookingActions() {
     decidingId: status.variables?.id,
   };
 }
+
+/* ----------------------------------------------------------- customer side */
+
+/** The signed-in customer's bookings. Lives under ["bookings"], so admin changes refresh it too. */
+export function useMyBookings(email) {
+  return useQuery({ queryKey: [...BOOKINGS_KEY, "mine", email], queryFn: () => getMyBookings(email), enabled: Boolean(email) });
+}
+
+/** Checkout and My Bookings writes; each refreshes the admin views that read the same store. */
+function useCustomerBookingMutation(mutationFn) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSettled: () => {
+      refreshAfterChange(queryClient);
+      // Departure seat counts on Tour Detail change with bookings.
+      queryClient.invalidateQueries({ queryKey: ["storefront"] });
+    },
+  });
+}
+
+export const useCreateBooking = () => useCustomerBookingMutation(createBooking);
+export const usePayBooking = () => useCustomerBookingMutation(payBooking);
+export const useCancelMyBooking = () => useCustomerBookingMutation(cancelMyBooking);

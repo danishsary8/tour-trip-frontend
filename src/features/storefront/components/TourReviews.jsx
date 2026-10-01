@@ -7,7 +7,25 @@ import { chartAnimation, tooltipPreset, useChartTheme } from "../../../lib/chart
 
 const dateLabel = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-export function TourReviews({ reviews }) {
+const LOCKED = {
+  guest: { tip: "Sign in to write a review", label: "Write a review: sign in required" },
+  none: { tip: "Only travellers who completed this tour can review it", label: "Write a review: available after you complete this tour" },
+  reviewed: { tip: "Thanks! Reviews appear after a quick approval", label: "You have already reviewed this tour" },
+};
+
+/**
+ * "Write a review" works only for a signed-in traveller with a Completed booking of this tour
+ * that has no review yet; otherwise it explains why it is locked.
+ */
+function ReviewButton({ action }) {
+  if (action?.state === "eligible") {
+    return <button type="button" onClick={action.onWrite} className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/[0.06] px-5 py-2.5 text-sm font-semibold text-primary-ink outline-none transition-all hover:-translate-y-0.5 hover:bg-primary/[0.1] focus-visible:ring-2 focus-visible:ring-primary active:translate-y-0 active:scale-[0.98]"><Star className="size-4" aria-hidden="true" />Write a review</button>;
+  }
+  const locked = LOCKED[action?.state] ?? LOCKED.guest;
+  return <Tooltip label={locked.tip} side="bottom" className="inline-flex"><button type="button" aria-disabled="true" aria-label={locked.label} className="cursor-not-allowed rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-muted opacity-65 transition-colors hover:border-primary/35 focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99]">{action?.state === "reviewed" ? "Review submitted" : "Write a review"}</button></Tooltip>;
+}
+
+export function TourReviews({ reviews, reviewAction }) {
   const theme = useChartTheme();
   const reduceMotion = useReducedMotion();
   const counts = [5, 4, 3, 2, 1].map((rating) => reviews.filter((review) => review.rating === rating).length);
@@ -21,7 +39,7 @@ export function TourReviews({ reviews }) {
 
   return <section aria-labelledby="tour-reviews-title">
     <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-ink">Traveller voices</p><h2 id="tour-reviews-title" className="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Stories from the journey</h2></div>
-      <Tooltip label="Sign in to write a review" side="bottom" className="inline-flex" ><button type="button" aria-disabled="true" aria-label="Write a review: sign in required" className="cursor-not-allowed rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-muted opacity-65 transition-colors hover:border-primary/35 focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99]">Write a review</button></Tooltip></div>
+      <ReviewButton action={reviewAction} /></div>
     {reviews.length ? <><div className="mt-8 grid gap-6 rounded-panel border border-border bg-surface p-5 sm:grid-cols-[180px_1fr] sm:p-7">
       <div className="flex flex-col items-center justify-center border-b border-border pb-5 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-6"><span className="font-display text-6xl font-semibold text-foreground">{average.toFixed(1)}</span><span className="mt-2 flex gap-0.5" aria-label={`${average.toFixed(1)} out of 5 stars`}>{[1, 2, 3, 4, 5].map((number) => <Star key={number} className={`size-4 ${number <= Math.round(average) ? "fill-accent text-accent" : "text-muted/35"}`} aria-hidden="true" />)}</span><span className="mt-2 text-sm text-muted">{reviews.length} verified reviews</span></div>
       <div role="img" aria-label={`Rating breakdown: ${counts.map((count, index) => `${5 - index} stars ${count}`).join(", ")}`} className="h-44 min-w-0"><Bar data={data} options={options} /></div></div>

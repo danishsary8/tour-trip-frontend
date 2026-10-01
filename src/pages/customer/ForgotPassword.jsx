@@ -1,125 +1,88 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, Mail, MailCheck } from "lucide-react";
+import { ArrowLeft, KeyRound, Mail, MailCheck } from "lucide-react";
 import { toast } from "sonner";
-import { CustomerAuthShell } from "../../features/storefront/auth/CustomerAuthShell";
+import { AuthCard, AuthKicker, CustomerAuthLayout } from "../../features/storefront/auth/CustomerAuthLayout";
 import { Button } from "../../components/ui/Button";
-import mekongHero from "../../assets/images/common/mekong_river_sunset.jpg";
+import { Input } from "../../components/ui/Input";
 
+const linkClass =
+  "inline-flex items-center gap-1.5 font-semibold text-accent transition-colors hover:text-[#f4ce72] hover:underline hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent";
+
+/** Customer password reset (mock: nothing is sent). Admin resets go through the system administrator. */
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!email) {
-      toast.error("Please enter your email address.");
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+      setError("Please enter a valid email address");
       return;
     }
+    setError("");
     setLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 600));
     setLoading(false);
     setSubmitted(true);
-    toast.success("Password reset instructions sent!");
+    toast.success("Password reset instructions sent");
   }
 
   return (
-    <CustomerAuthShell
-      image={mekongHero}
-      imageAlt="Mekong river sunset with traditional longtail boat"
-      tagline="Living Waters & Golden Sunsets"
-      title={submitted ? "Check your email" : "Reset your password"}
-      subtitle={
-        submitted
-          ? `We sent instructions to ${email || "your address"}. Follow the link in that email to reset your password.`
-          : "Enter your email address and we will send you a link to reset your account password."
-      }
-      footer={
-        <p>
-          Remember your password?{" "}
-          <Link
-            to="/login"
-            className="font-semibold text-primary transition-colors hover:text-primary/80 hover:underline"
-          >
-            Sign in
-          </Link>
-        </p>
-      }
-    >
-      {submitted ? (
-        <div className="space-y-5 text-center py-2">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <MailCheck className="size-7" />
-          </div>
-
-          <div className="rounded-2xl border border-border bg-surface-2/60 p-4 text-xs text-muted leading-relaxed">
-            <p className="flex items-center justify-center gap-1.5 font-medium text-foreground">
-              <CheckCircle2 className="size-3.5 text-accent" />
-              Reset email dispatched
-            </p>
-            <p className="mt-1">
-              Didn't receive it? Check your spam folder or wait a couple of minutes before requesting another link.
-            </p>
-          </div>
-
-          <div className="space-y-2.5 pt-2">
-            <button
-              type="button"
-              onClick={() => setSubmitted(false)}
-              className="text-xs font-semibold text-primary hover:underline"
-            >
-              Try another email address
-            </button>
-            <Link
-              to="/login"
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-white shadow-md transition hover:bg-primary/90"
-            >
-              <ArrowLeft className="size-4" /> Return to Sign In
+    <CustomerAuthLayout>
+      <AuthCard
+        kicker={<AuthKicker icon={KeyRound}>Traveller account</AuthKicker>}
+        title={submitted ? "Check your email" : "Reset your password"}
+        subtitle={
+          submitted
+            ? `If an account exists for ${email.trim()}, we've sent a link to reset its password.`
+            : "Enter the email you signed up with and we'll send you a reset link."
+        }
+        footer={
+          <p>
+            Remember your password?{" "}
+            <Link to="/login" className={linkClass}>
+              Sign in
             </Link>
-          </div>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          <div className="space-y-1.5">
-            <label htmlFor="reset-email" className="block text-xs font-semibold uppercase tracking-wider text-muted">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
-              <input
-                id="reset-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                placeholder="customer@tourtrip.com"
-                required
-                className="h-11 w-full rounded-xl border border-border bg-surface-2/60 pl-10 pr-4 text-sm text-foreground placeholder:text-muted/60 transition outline-none hover:bg-surface-2 focus:border-primary focus:bg-surface focus:ring-2 focus:ring-primary/20"
-              />
+          </p>
+        }
+      >
+        {submitted ? (
+          <div className="space-y-5 text-center">
+            <div className="mx-auto grid size-14 place-items-center rounded-2xl border border-accent/25 bg-accent/10 text-accent">
+              <MailCheck className="size-7" aria-hidden="true" />
+            </div>
+            <p className="text-sm leading-relaxed text-white/60">
+              Didn't get it? Check your spam folder, or wait a couple of minutes before trying again.
+            </p>
+            <div className="flex flex-col items-center gap-3">
+              <Button variant="outline" size="lg" className="w-full border-white/14 bg-white/5" onClick={() => setSubmitted(false)}>
+                Try another email address
+              </Button>
+              <Link to="/login" className={linkClass}>
+                <ArrowLeft className="size-4" aria-hidden="true" /> Back to sign in
+              </Link>
             </div>
           </div>
-
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            loading={loading}
-            className="w-full font-semibold shadow-md active:scale-[0.99]"
-          >
-            Send Reset Link
-          </Button>
-
-          <div className="pt-2 text-center">
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-muted hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="size-3.5" /> Back to Sign In
-            </Link>
-          </div>
-        </form>
-      )}
-    </CustomerAuthShell>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <Input
+              label="Email address"
+              icon={Mail}
+              type="email"
+              autoComplete="email"
+              value={email}
+              error={error}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+            <Button type="submit" size="lg" className="w-full" loading={loading}>
+              Send reset link
+            </Button>
+          </form>
+        )}
+      </AuthCard>
+    </CustomerAuthLayout>
   );
 }

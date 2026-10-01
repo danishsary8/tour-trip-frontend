@@ -64,7 +64,7 @@ function Included({ included, excluded }) {
     </div></div>;
 }
 
-export function TourSections({ tour, story, reviews }) {
+export function TourSections({ tour, story, reviews, reviewAction }) {
   const [active, setActive] = useState("overview");
   const reduceMotion = useReducedMotion();
   return <Reveal className="min-w-0"><Tabs tabs={TABS} value={active} onChange={setActive} label="Tour details" idPrefix="tour-detail" className="sticky top-16 z-20 bg-background/95 backdrop-blur-md sm:top-20" />
@@ -74,7 +74,7 @@ export function TourSections({ tour, story, reviews }) {
       {active === "overview" && <Overview tour={tour} story={story} />}
       {active === "itinerary" && <Itinerary days={story.itinerary} />}
       {active === "included" && <Included included={story.included} excluded={story.excluded} />}
-      {active === "reviews" && <TourReviews reviews={reviews} />}
+      {active === "reviews" && <TourReviews reviews={reviews} reviewAction={reviewAction} />}
     </motion.div></AnimatePresence>
   </Reveal>;
 }

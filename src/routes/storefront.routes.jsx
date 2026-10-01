@@ -1,4 +1,5 @@
 import { lazy } from "react";
+import { Navigate } from "react-router-dom";
 import { RequireCustomer } from "../features/storefront/auth/RequireCustomer";
 
 const HomePage = lazy(() => import("../features/storefront/pages/HomePage"));
@@ -12,9 +13,9 @@ const ContactPage = lazy(() => import("../features/storefront/pages/ContactPage"
 const FaqPage = lazy(() => import("../features/storefront/pages/FaqPage"));
 const NotFoundPage = lazy(() => import("../features/storefront/pages/NotFoundPage"));
 const TourDetailPage = lazy(() => import("../features/storefront/pages/TourDetailPage"));
-const BookingStubPage = lazy(() => import("../features/storefront/pages/BookingStubPage"));
+const BookingPage = lazy(() => import("../features/storefront/pages/BookingPage"));
 const WishlistPage = lazy(() => import("../features/storefront/pages/WishlistPage"));
-const CustomerBookingsPage = lazy(() => import("../features/storefront/pages/CustomerBookingsPage"));
+const MyBookingsPage = lazy(() => import("../features/storefront/pages/MyBookingsPage"));
 
 /** Public storefront pages rendered inside StorefrontLayout. */
 export const storefrontRoutes = [
@@ -28,8 +29,10 @@ export const storefrontRoutes = [
   { path: "faq", element: <FaqPage /> },
   { path: "tours/:id", element: <TourDetailPage /> },
   { path: "wishlist", element: <WishlistPage /> },
-  { path: "booking/:tourId", element: <RequireCustomer><BookingStubPage /></RequireCustomer> },
-  { path: "account/bookings", element: <RequireCustomer><CustomerBookingsPage /></RequireCustomer> },
+  { path: "booking/:tourId", element: <RequireCustomer><BookingPage /></RequireCustomer> },
+  { path: "my-bookings", element: <RequireCustomer><MyBookingsPage /></RequireCustomer> },
+  // Older links (and the first auth release) used /account/bookings.
+  { path: "account/bookings", element: <Navigate to="/my-bookings" replace /> },
   { path: "account/:mode", element: <AccountPage /> },
   // Any URL no other route claims (public, not /admin) lands on the branded 404.
   { path: "*", element: <NotFoundPage /> },
