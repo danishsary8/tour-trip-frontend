@@ -6,7 +6,7 @@ export const primaryPill = `${pill} bg-primary text-white shadow-glow hover:-tra
 export const outlinePill = `${pill} border border-border bg-surface text-foreground hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.05] focus-visible:ring-primary active:translate-y-0`;
 export const quietButton =
   "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-primary-ink outline-none transition-colors hover:bg-primary/[0.08] focus-visible:ring-2 focus-visible:ring-primary active:scale-95 disabled:pointer-events-none disabled:opacity-50";
-export const panel = "rounded-panel border border-border bg-surface shadow-soft";
+export const panel = "rounded-panel border border-border bg-surface";
 export const eyebrow = "text-xs font-semibold uppercase tracking-[0.16em] text-primary-ink";
 
 const smallPill =

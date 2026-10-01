@@ -39,7 +39,7 @@ function sortBookings(list) {
 
 function Stat({ icon: Icon, label, value, detail }) {
   return (
-    <div className="flex min-w-0 items-center gap-4 rounded-card border border-border bg-surface p-5 shadow-soft">
+    <div className="flex min-w-0 items-center gap-4 rounded-card border border-border bg-surface p-5">
       <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary-ink"><Icon className="size-5" aria-hidden="true" /></span>
       <div className="min-w-0">
         <p className="text-xs text-muted">{label}</p>

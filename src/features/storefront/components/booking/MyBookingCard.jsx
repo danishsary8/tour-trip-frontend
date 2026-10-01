@@ -45,7 +45,7 @@ export function MyBookingCard({ booking, review, cancellation, downloading, onOp
   const cancelBlocked = !cancellation.allowed && cancellation.reason;
 
   return (
-    <article className="overflow-hidden rounded-panel border border-border bg-surface shadow-soft transition-shadow duration-300 hover:shadow-panel">
+    <article className="overflow-hidden rounded-panel border border-border bg-surface transition-colors duration-300 hover:border-foreground/20">
       <div className="grid sm:grid-cols-[208px_minmax(0,1fr)]">
         <button type="button" onClick={onOpen} tabIndex={-1} aria-hidden="true" className="relative block h-40 overflow-hidden sm:h-full">
           <img src={booking.tourImage} alt="" loading="lazy" decoding="async" className="size-full object-cover transition-transform duration-500 hover:scale-105" />
