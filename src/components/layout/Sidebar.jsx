@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
-import { ChevronDown, LogOut, X } from "lucide-react";
+import { ChevronDown, ExternalLink, LogOut, Store, X } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { motionEase } from "../../lib/motion";
 import { useAuth } from "../../features/auth/AuthContext";
@@ -191,6 +191,17 @@ export function SidebarContent({ rail = false, headerAction, onNavigate }) {
               onNavigate={onNavigate}
             />
           ))}
+          {!rail && (
+            <Link
+              to="/storefront"
+              onClick={onNavigate}
+              className="mt-3 flex min-h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-medium text-muted outline-none transition-colors duration-200 hover:bg-surface-2 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60"
+            >
+              <Store className="size-[18px] shrink-0" aria-hidden="true" />
+              <span className="flex-1">Customer storefront</span>
+              <ExternalLink className="size-3.5 shrink-0 opacity-60" aria-hidden="true" />
+            </Link>
+          )}
           {!rail && <AngkorLines className="mx-auto mt-8 h-12 w-[85%] text-accent/20" />}
         </nav>
       </LayoutGroup>

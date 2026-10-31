@@ -2,6 +2,34 @@
 
 This file is append-only. Add new entries at the top of the log section without rewriting prior entries.
 
+## 2026-10-31 - Support direct Vercel routes for the admin dashboard
+
+- Agent: Codex
+- Added a Vercel rewrite that serves the Vite app entry for client-side paths such as `/admin`; this fixes Vercel's host-level 404 on direct route visits and refreshes.
+- The app's existing route configuration redirects `/` to `/admin` and leaves admin routes accessible without login.
+- Tests: not run (not requested).
+- Known issues: Vercel applies this after a redeploy; the live deployment remains unchanged until the config is deployed.
+- Next steps: commit and push the changes to the branch connected to the Vercel project, then verify the deployment at `/admin`.
+
+## 2026-10-17 - Restore a direct customer storefront entry
+
+- Agent: Codex
+- Added `/storefront` as a direct entry to the customer home page while keeping `/` pointed at the admin dashboard.
+- Added a Customer storefront link in the admin sidebar for desktop and mobile navigation.
+- Tests: not run (not requested).
+- Known issues: customer storefront pages remain available on their existing paths; this adds a dedicated entry to its home page.
+- Next steps: none.
+
+## 2026-10-16 - Open the admin dashboard by default
+
+- Agent: Codex
+- Changed `/` to redirect to `/admin`, whose index route is the admin dashboard.
+- Removed the admin route authentication gate so frontend admin pages are accessible without signing in; the admin login page remains available directly.
+- Kept the storefront's other routes mounted under the existing layout.
+- Tests: not run (not requested).
+- Known issues: admin sign-out still clears the mock session, but the route no longer blocks access afterward.
+- Next steps: restore an authentication gate when backend-backed admin authentication is ready.
+
 ## 2026-10-01 — Storefront redesign: real photos, International Escapes, new Tour Detail
 
 - Agent: Claude Code

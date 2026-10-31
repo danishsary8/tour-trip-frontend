@@ -6,7 +6,6 @@ import { AdminLayout } from "../layouts/AdminLayout";
 import { adminRoutes } from "./admin.routes";
 import { publicRoutes } from "./public.routes";
 import { storefrontRoutes } from "./storefront.routes";
-import { ProtectedRoute } from "./ProtectedRoute";
 
 function PageLoader() {
   return (
@@ -24,21 +23,24 @@ export function AppRoutes() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/" element={<StorefrontLayout />}>
-          {storefrontRoutes.map((route) => (
-            <Route key={route.index ? "storefront-index" : route.path} {...route} />
+          <Route index element={<Navigate to="/admin" replace />} />
+          {storefrontRoutes.filter((route) => !route.index).map((route) => (
+            <Route key={route.path} {...route} />
           ))}
+        </Route>
+
+        <Route path="/storefront" element={<StorefrontLayout />}>
+          <Route index element={storefrontRoutes.find((route) => route.index)?.element} />
         </Route>
 
         {publicRoutes.map((route) => (
           <Route key={route.path} {...route} />
         ))}
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/admin" element={<AdminLayout />}>
-            {adminRoutes.map((route) => (
-              <Route key={route.index ? "admin-index" : route.path} {...route} />
-            ))}
-          </Route>
+        <Route path="/admin" element={<AdminLayout />}>
+          {adminRoutes.map((route) => (
+            <Route key={route.index ? "admin-index" : route.path} {...route} />
+          ))}
         </Route>
 
         <Route path="/admin/manageBooking" element={<Navigate to="/admin/bookings" replace />} />
