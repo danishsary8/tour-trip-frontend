@@ -41,6 +41,7 @@ src/
     pages/                Storefront route pages (Home, Tours, Destinations, Gallery, Reviews, About, Contact, FAQ, 404)
     components/           TourCard (the only tour card), Reveal, Breadcrumbs, PageIntro, hero, sections, filters
     mocks.js              Public view of the shared catalogue — never a second tour list
+    places.js             Real coordinates per tour (the small caption on Tour Detail / International cards)
     api.js, hooks.js       Public catalogue + testimonials (TanStack Query)
     filters.js             URL-driven /tours filters and sorting
     content.js             Static site copy (story, FAQ, contact, trust, promo); reads settings/domain constants
@@ -53,7 +54,7 @@ src/
     schema.js              Validation schemas
   layouts/                 Route layouts
   lib/                     Shared clients and configuration
-  mocks/                   Canonical home for mock fixtures
+  mocks/                   Canonical home for mock fixtures (tourImages.js = the one tour photo map)
   pages/                   Route-level composition
   routes/                  Route definitions and guards
   styles/                  Global tokens and theme styles
@@ -94,6 +95,8 @@ The sidebar, breadcrumbs and command palette follow this order (`src/components/
 
 ## Domain rules
 
+- Every destination has a `country` (default `Cambodia`); a tour's country comes from its destination. Tours whose country is not Cambodia are "International Escapes" (category `international`) — they appear in their own Home band and the `?region=international` filter, never in Cambodia-only sections.
+- Tour photos are real, correctly located photographs in `src/assets/images/tours/<tour-id>/` (credits in `CREDITS.md`), mapped once in `src/mocks/tourImages.js`. Never use AI renderings or a photo of a different place.
 - Booking status: `Pending`, `Confirmed`, `Completed`, `Cancelled`. "Reject" is `Cancelled` with reason `Rejected by admin`.
 - Payment status: `Unpaid`, `Paid`, `Refunded`.
 - Payment methods (exactly): `Cash`, `Bank Transfer`, `ABA Pay (Simulation)`, `Credit Card (Simulation)`.

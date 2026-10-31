@@ -1,10 +1,7 @@
-## 2026-10-01 — Customer and admin logins are now separate
+## 2026-10-01 — Storefront redesign: real photos, International Escapes, new Tour Detail
 
-- **What changed:** the photo slideshow sign-in now belongs to customers (`/login`, `/register`, `/forgot-password`). Login is a single step; registration is two steps. `/admin/login` is a plain, dark "admin console" page: password, then the 6-digit code. It has no way to create an account, and "Forgot password" says to contact the system administrator.
-- **Try the lockout:** at `/admin/login`, enter `admin@tourtrip.com` with a wrong password 5 times. The form locks and counts down from 15:00, even after a reload. To unlock early, clear the site data in the browser.
-- **Try the inactivity logout:** sign in (Admin@123, code 123456), then in DevTools run `localStorage.setItem("tourtrip.admin.idleTimeoutMs", "60000")` and leave the mouse and keyboard alone. About a minute later you're sent back to the login page with "You were logged out due to inactivity." Remove that key to go back to 30 minutes.
-- **Last login:** after signing in, the welcome message and the account menu (top right) show the previous sign-in time and browser. The first sign-in in a new browser shows a made-up one.
-- Customer demo: `customer@tourtrip.com` / `Customer@123`. The "Dev only" fill buttons only appear when running `npm run dev`.
-- **Please decide:**
-  - Merge `feature/storefront-booking` first; this branch is built on it.
-  - Should the lockout also count wrong 6-digit codes, and should "Remember me" skip the inactivity logout? Right now neither happens.
+- **Photos:** every tour now has 2–4 real photos of the actual place, downloaded from Unsplash and checked by hand (credits in `src/assets/images/tours/CREDITS.md`). Nothing for you to drop in. The Home hero is unchanged as asked, but three of its images are AI renderings; swap them in `HomeHero.jsx` if you like.
+- **New:** three "International Escapes" tours (Bali, Hanoi & Ha Long Bay, Kyoto) with their own band on Home, a Where filter on /tours, and a Beyond Cambodia section on Destinations. Dashboard and report numbers are unchanged.
+- **Tour Detail is a different page now:** a big photo hero, then one scrolling page with a section bar (Overview, Highlights, Photos, Itinerary, What's included, Departures, Reviews). Booking works as before.
+- **Try:** open `/tours/kyoto-temples-gardens`, pick a date in Departures (the booking card follows), book it as `customer@tourtrip.com` / `Customer@123`; then Gallery, Reviews and Destinations to see the new look.
+- **Please decide:** one commit in the middle of this branch (`cc9c9f9`) doesn't build on its own. The final code is fine. Either squash-merge the branch, or let me force-push the repaired history I prepared.
