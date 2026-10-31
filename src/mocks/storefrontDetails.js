@@ -12,18 +12,21 @@ export function tourPhotos(tour) {
 /** Editorial copy only. Core tour fields, guide, reviews and availability stay in their shared stores. */
 const STORIES = {
   "angkor-sunrise": {
+    highlights: [["Sunrise", "Sunrise over the Angkor Wat reflecting pool"], ["Landmark", "The stone faces of Bayon"], ["TreePine", "Ta Prohm's tree-wrapped galleries"], ["Car", "Hotel pickup before dawn"], ["Users", "Small group, up to 20"]],
     overview: "Begin before the city wakes and watch the lotus towers emerge from the morning mist. Your guide leads you beyond the familiar postcard view, through quiet galleries, carved stories and shaded temple paths at a pace that leaves room to take it all in.",
     meetingPoint: "Siem Reap hotel pickup",
     itinerary: [{ title: "Sunrise over Angkor", description: "Early pickup, sunrise at Angkor Wat, a relaxed breakfast stop, then Bayon faces and the tree-rooted halls of Ta Prohm." }],
     included: ["Local Khmer guide", "Hotel pickup and transport", "Drinking water"], excluded: ["Angkor entry pass", "Personal expenses"],
   },
   "phnom-penh-city": {
+    highlights: [["Landmark", "Royal Palace and Silver Pagoda"], ["ShoppingBasket", "A local market with your guide"], ["Sunset", "Sunset on the riverside"], ["Users", "Small group, up to 24"]],
     overview: "Follow the capital's layered story from gilded palace roofs to everyday riverside life. This small-group route pairs landmark architecture with market moments and thoughtful context from a local guide.",
     meetingPoint: "Riverside, Phnom Penh",
     itinerary: [{ title: "Capital stories", description: "Meet by the riverside, visit the Royal Palace and Silver Pagoda, explore a local market and finish with a Mekong sunset view." }],
     included: ["Local guide", "City transport", "Drinking water"], excluded: ["Palace entry ticket", "Meals and personal purchases"],
   },
   "koh-rong": {
+    highlights: [["Ship", "Return ferry from Sihanoukville"], ["Fish", "Snorkelling in sheltered water"], ["Footprints", "A coastal trail walk"], ["Sparkles", "Glowing plankton after dark"]],
     overview: "Trade the mainland rush for three unhurried days beside the Gulf. Boat across clear water, explore palm-fringed shores and leave plenty of room for the island's quieter corners.",
     meetingPoint: "Sihanoukville ferry pier",
     itinerary: [
@@ -34,6 +37,7 @@ const STORIES = {
     included: ["Local guide", "Return ferry", "Drinking water"], excluded: ["Accommodation", "Meals and personal expenses"],
   },
   "kampot-adventure": {
+    highlights: [["Leaf", "Pepper farm visit and tasting"], ["Sailboat", "Kayaking the river at golden hour"], ["House", "Riverside villages on day two"], ["Users", "Small group, up to 16"]],
     overview: "Kampot's green waterways and pepper-growing countryside make this a gentle adventure with a strong sense of place. Paddle, taste and slow down beside the river.",
     meetingPoint: "Kampot riverside",
     itinerary: [
@@ -43,42 +47,49 @@ const STORIES = {
     included: ["Local guide", "Kayak equipment", "Transport and drinking water"], excluded: ["Accommodation", "Meals and personal expenses"],
   },
   "kulen-mountain": {
+    highlights: [["Droplets", "Time by the Phnom Kulen waterfall"], ["Landmark", "The River of a Thousand Lingas"], ["Sparkles", "A reclining Buddha carved in stone"], ["Mountain", "Cooler air in the Kulen hills"]],
     overview: "Head into the cooler foothills above Siem Reap for sacred carvings, forest paths and a waterfall pause. A local guide connects the landscape with the stories that give it meaning.",
     meetingPoint: "Siem Reap hotel pickup",
     itinerary: [{ title: "Mountain and waterfall", description: "Drive to Phnom Kulen, see the River of a Thousand Lingas and reclining Buddha, then relax near the waterfall." }],
     included: ["Local guide", "Transport", "Drinking water"], excluded: ["National park entry", "Lunch and personal expenses"],
   },
   "bokor-hill": {
+    highlights: [["Church", "The old church and Bokor Palace"], ["Mountain", "Cool air at over 1,000 m"], ["Binoculars", "Views to the Gulf of Thailand"], ["Users", "Small group, up to 18"]],
     overview: "Climb from Kampot's warm lowlands into misty hill air and atmospheric colonial-era ruins. Wide views and a slower pace make the mountain feel a world away.",
     meetingPoint: "Kampot town centre",
     itinerary: [{ title: "Into the highlands", description: "Travel to Bokor National Park, visit the historic hill station and stop at scenic overlooks on the return." }],
     included: ["Local guide", "Transport", "Drinking water"], excluded: ["Park admission", "Meals and personal expenses"],
   },
   "tonle-sap-village": {
+    highlights: [["Ship", "A boat through a stilt village"], ["TreePine", "The flooded forest"], ["House", "How families live with the lake's seasons"], ["Users", "Small group, up to 16"]],
     overview: "Life around Tonlé Sap changes with the water. Travel by boat among stilted homes and flooded forest while learning how communities adapt to the lake's seasons.",
     meetingPoint: "Siem Reap hotel pickup",
     itinerary: [{ title: "Life on the lake", description: "Drive to the boat landing, cruise through a lakeside village and flooded forest, then return to Siem Reap." }],
     included: ["Local guide", "Boat trip", "Transport and drinking water"], excluded: ["Meals", "Personal expenses"],
   },
   "siem-reap-street-food": {
+    highlights: [["Soup", "Khmer favourites at the night markets"], ["Utensils", "Tasting stops included"], ["Moon", "Starts at 17:30, ends with dessert"], ["Users", "Small group, up to 12"]],
     overview: "Follow the evening aromas through Siem Reap's markets and side streets. Taste beloved Khmer dishes, meet the people behind the stalls and hear how local food is shared.",
     meetingPoint: "Old Market, Siem Reap",
     itinerary: [{ title: "Night-market tastes", description: "Meet your foodie guide, sample market snacks and Khmer favourites, then finish with a relaxed dessert stop." }],
     included: ["Local food guide", "Tasting stops", "Drinking water"], excluded: ["Alcoholic drinks", "Extra purchases"],
   },
   "kep-rabbit-island": {
+    highlights: [["Fish", "Kep's crab market"], ["Ship", "Return boat to Rabbit Island"], ["Waves", "An easy afternoon on the beach"], ["Users", "Small group, up to 16"]],
     overview: "Begin at Kep's famous crab market, where the sea and Kampot pepper meet. Then cross to Rabbit Island for sand, shade and an easygoing afternoon.",
     meetingPoint: "Kep Crab Market",
     itinerary: [{ title: "Market to island", description: "Meet at the crab market, sample the local catch, cross to Rabbit Island and return to Kep in the late afternoon." }],
     included: ["Local guide", "Return boat", "Drinking water"], excluded: ["Crab lunch", "Personal expenses"],
   },
   "battambang-countryside": {
+    highlights: [["TrainFront", "A ride on the bamboo train"], ["Hammer", "Countryside workshops and makers"], ["Wheat", "Rice fields and village roads"], ["Users", "Small group, up to 16"]],
     overview: "Battambang moves to a gentler rhythm. Ride the bamboo train past rice fields, meet local makers and discover why this creative riverside city rewards a slower look.",
     meetingPoint: "Battambang town centre",
     itinerary: [{ title: "Bamboo train and rural life", description: "Meet your guide in town, ride the bamboo train, visit countryside workshops and return via quiet village roads." }],
     included: ["Local guide", "Bamboo-train ride", "Transport and drinking water"], excluded: ["Lunch", "Personal purchases"],
   },
   "bali-highlands": {
+    highlights: [["Wheat", "Tegallalang terraces at first light"], ["Landmark", "Pura Ulun Danu Beratan on the lake"], ["Droplets", "The water temple of Tirta Empul"], ["BedDouble", "4 nights in family-run stays"], ["Plane", "A TourTrip tour leader from Phnom Penh"]],
     overview: "Bali's interior is cooler, greener and quieter than its beaches. Five unhurried days take you from Ubud's rice terraces up into the lake country around Bedugul, with a TourTrip tour leader travelling with you from Phnom Penh and a Balinese guide on the ground.",
     meetingPoint: "Ngurah Rai International Airport, Denpasar",
     itinerary: [
@@ -92,6 +103,7 @@ const STORIES = {
     excluded: ["Flights to and from Bali", "Indonesian visa on arrival", "Lunches and drinks", "Travel insurance"],
   },
   "hanoi-halong-bay": {
+    highlights: [["Ship", "A night aboard a Ha Long Bay junk"], ["Sailboat", "Kayaking among limestone islands"], ["Coffee", "Coffee on Hanoi's train street"], ["Plane", "A TourTrip tour leader from Phnom Penh"]],
     overview: "Start in Hanoi's Old Quarter, where every street once belonged to a single trade, then head to the coast for a night on Ha Long Bay. The pace is gentle and the group small, with a TourTrip tour leader and a Vietnamese guide throughout.",
     meetingPoint: "Noi Bai International Airport, Hanoi",
     itinerary: [
@@ -104,6 +116,7 @@ const STORIES = {
     excluded: ["Flights to and from Hanoi", "Vietnamese e-visa", "Lunches and dinners in Hanoi", "Travel insurance"],
   },
   "kyoto-temples-gardens": {
+    highlights: [["Landmark", "Fushimi Inari before the crowds"], ["TreePine", "Arashiyama's bamboo grove at opening"], ["Moon", "Gion's teahouse lanes at dusk"], ["BedDouble", "4 nights in a ryokan-style inn"], ["Plane", "A TourTrip tour leader from Phnom Penh"]],
     overview: "Kyoto rewards early starts. This five-day route reaches the famous places before the crowds, then slows down for tea, gardens and the old wooden streets of Gion. A TourTrip tour leader travels with you and a licensed Kyoto guide joins each day.",
     meetingPoint: "Kyoto Station (from Kansai International Airport)",
     itinerary: [
@@ -127,5 +140,11 @@ export function tourStory(tour, guide) {
     itinerary: copy.itinerary ?? tour.itinerary ?? [],
     included: copy.included ?? tour.included ?? [],
     excluded: copy.excluded ?? tour.excluded ?? [],
+    // [lucide icon name, short callout]; tours added in admin get facts from their own record.
+    highlights: copy.highlights ?? [
+      ["Users", `Small group, up to ${tour.capacity}`],
+      ["MapPin", `Starts in ${tour.destination}`],
+      ["Compass", "Led by a TourTrip guide"],
+    ],
   };
 }
