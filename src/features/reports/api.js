@@ -138,6 +138,7 @@ export function getDestinationReport(range) {
         id: destination.id,
         name: destination.name,
         province: destination.province,
+        country: destination.country,
         tours: TOURS.filter((tour) => tour.destinationId === destination.id).length,
         bookings: destinationBookings.length,
         travellers: sum(destinationBookings, (booking) => booking.guests),

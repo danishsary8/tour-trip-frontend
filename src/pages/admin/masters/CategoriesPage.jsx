@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Building2, Compass, Landmark, Mountain, Plus, Trees, UtensilsCrossed, Waves } from "lucide-react";
+import { Building2, Compass, Landmark, Mountain, Plane, Plus, Trees, UtensilsCrossed, Waves } from "lucide-react";
 import { ConfirmDialog } from "../../../components/shared/ConfirmDialog";
 import { DataTable } from "../../../components/shared/DataTable";
 import { Drawer } from "../../../components/shared/Drawer";
@@ -13,7 +13,7 @@ import { Button } from "../../../components/ui/Button";
 import { useCategories, useCategoryStatus, useDeleteCategory, useSaveCategory } from "../../../features/categories/hooks";
 import { CATEGORY_ICONS, categorySchema } from "../../../features/categories/schema";
 
-const ICONS = { Landmark, Building2, Mountain, Waves, Trees, Compass, UtensilsCrossed };
+const ICONS = { Landmark, Building2, Mountain, Waves, Trees, Compass, UtensilsCrossed, Plane };
 const fieldClass = "w-full rounded-control border border-border bg-surface-2/40 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20";
 
 function CategoryForm({ item, onSave, id = "category-form" }) {

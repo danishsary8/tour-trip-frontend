@@ -79,7 +79,7 @@ export function DestinationReport({ range }) {
         cell: ({ row }) => (
           <span className="min-w-0">
             <span className="block font-semibold">{row.original.name}</span>
-            <span className="block text-xs text-muted">{row.original.province} province</span>
+            <span className="block text-xs text-muted">{row.original.country && row.original.country !== "Cambodia" ? `${row.original.province}, ${row.original.country}` : `${row.original.province} province`}</span>
           </span>
         ),
       },
