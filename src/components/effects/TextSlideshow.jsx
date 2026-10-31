@@ -59,7 +59,7 @@ export function TextSlideshow({
           transition={{ duration: 0.3 }}
           className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-accent"
         >
-          <span className="h-px w-8 bg-accent/70" /> {slide.tagline}
+          <span className="flex items-center gap-1" aria-hidden="true"><span className="w-7 border-t-[1.5px] border-dashed border-accent/70" /><span className="size-1.5 rounded-full bg-accent" /></span> {slide.tagline}
         </motion.p>
 
         <motion.span

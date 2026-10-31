@@ -220,7 +220,7 @@ function Wizard({ tour, schedules, settings, user, myBookings, params, setParams
         </div>
       ) : (
         <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px] xl:gap-12">
-          <section className="min-w-0 rounded-panel border border-border bg-surface p-5 shadow-soft sm:p-8" aria-labelledby="booking-step-title">
+          <section className="min-w-0 rounded-panel border border-border bg-surface p-5 sm:p-8" aria-labelledby="booking-step-title">
             <p className="text-xs font-semibold uppercase tracking-widest text-accent-ink">{String(step + 1).padStart(2, "0")} / {String(BOOKING_STEPS.length).padStart(2, "0")}</p>
             <h2 id="booking-step-title" ref={headingRef} tabIndex={-1} className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] text-foreground outline-none">
               {STEP_COPY[step].title}

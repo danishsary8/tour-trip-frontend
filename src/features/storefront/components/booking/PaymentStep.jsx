@@ -96,7 +96,7 @@ export function PaymentStep({ booking, settings, email, onPaid }) {
                 key={method.key}
                 className={cn(
                   "group relative flex cursor-pointer gap-3.5 rounded-card border p-4 transition-[border-color,background-color,box-shadow] duration-200 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60",
-                  selected ? "border-primary bg-primary/[0.06] shadow-soft" : "border-border hover:border-primary/45 hover:bg-surface-2/60",
+                  selected ? "border-primary bg-primary/[0.06]" : "border-border hover:border-primary/45 hover:bg-surface-2/60",
                 )}
               >
                 <input type="radio" name={`${id}-method`} value={method.name} checked={selected} disabled={busy} onChange={() => setChoice(method.name)} className="sr-only" />

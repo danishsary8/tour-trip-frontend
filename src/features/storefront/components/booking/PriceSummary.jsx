@@ -46,7 +46,7 @@ export function PriceLines({ breakdown, totalLabel = "Total", className }) {
 export function TripSummary({ tour, schedule, adults, childCount, breakdown }) {
   return (
     <aside aria-label="Your trip" className="hidden self-start lg:sticky lg:top-24 lg:block">
-      <div className="overflow-hidden rounded-panel border border-border bg-surface shadow-panel">
+      <div className="overflow-hidden rounded-panel border border-border bg-surface">
         <div className="relative aspect-[16/9]">
           <img src={tour.image} alt="" className="size-full object-cover" width="380" height="214" decoding="async" />
           <span className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" aria-hidden="true" />
@@ -76,7 +76,7 @@ export function TripSummary({ tour, schedule, adults, childCount, breakdown }) {
 /** Below lg the running total stays pinned to the bottom of the screen. */
 export function MobileTotalBar({ adults, childCount, total }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 px-5 py-3 shadow-panel backdrop-blur-xl lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 px-5 py-3 backdrop-blur-xl lg:hidden">
       <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
         <p className="text-xs text-muted">Total · {travellersLabel(adults, childCount)}</p>
         <p className="font-display text-xl font-semibold tabular-nums text-foreground" aria-live="polite">{formatUsd(total)}</p>
