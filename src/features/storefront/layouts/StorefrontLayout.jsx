@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useThemeScope } from "../../../app/providers/ThemeProvider";
@@ -6,6 +6,7 @@ import { pageTransition } from "../../../lib/motion";
 import { FloatingContact } from "../components/FloatingContact";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
+import { HeroHeaderContext } from "./heroHeader";
 
 const staticPage = { initial: { opacity: 1 }, animate: { opacity: 1 }, exit: { opacity: 1, transition: { duration: 0 } } };
 
@@ -38,6 +39,7 @@ export function StorefrontLayout() {
   const location = useLocation();
   const outlet = useOutlet();
   const reduceMotion = useReducedMotion();
+  const [pageHero, setPageHero] = useState(false);
   useScrollRestoration(location, reduceMotion);
 
   return (
@@ -48,12 +50,14 @@ export function StorefrontLayout() {
       >
         Skip to content
       </a>
-      <SiteHeader overHero={location.pathname === "/"} />
+      <SiteHeader overHero={location.pathname === "/" || pageHero} />
       <main id="storefront-main" className="flex-1">
         {/* Keyed by path only, so filter changes on /tours (query string) don't replay the page transition. */}
         <AnimatePresence mode="wait" initial={false} onExitComplete={() => !location.hash && window.scrollTo(0, 0)}>
           <motion.div key={location.pathname} variants={reduceMotion ? staticPage : pageTransition} initial="initial" animate="animate" exit="exit">
-            <Suspense fallback={<PageFallback />}>{outlet}</Suspense>
+            <HeroHeaderContext.Provider value={setPageHero}>
+              <Suspense fallback={<PageFallback />}>{outlet}</Suspense>
+            </HeroHeaderContext.Provider>
           </motion.div>
         </AnimatePresence>
       </main>
