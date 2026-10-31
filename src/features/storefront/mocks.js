@@ -147,6 +147,8 @@ export function publicGallery() {
       (TOUR_PHOTOS[tour.id] ?? []).map((photo, index) => ({
         id: `gal-${tour.id}-${index}`,
         src: photo.src,
+        width: photo.width,
+        height: photo.height,
         title: photo.title,
         caption: photo.alt,
         tourId: tour.id,

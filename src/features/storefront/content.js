@@ -161,6 +161,10 @@ export const FAQ_GROUPS = [
         a: "Most visitors do. A 30-day tourist e-visa (currently US$30 plus a processing fee) can be bought online at evisa.gov.kh before you fly, or you can get a visa on arrival at the main airports and land borders. Your passport needs at least six months' validity. Always check the latest rules for your nationality before travelling.",
       },
       {
+        q: "Do International Escapes include flights and visas?",
+        a: "No. The price covers the tour leader, local guides, stays, the meals listed and transfers in the country; you book your own flights and arrange any visa (Indonesia and Vietnam offer e-visas, and many passports enter Japan visa-free for short stays). Every International Escape lists exactly what's included and the airport where we meet you.",
+      },
+      {
         q: "What should I wear to the temples?",
         a: "Angkor and the Royal Palace are active religious sites: cover your shoulders and knees. Light, breathable clothes, a hat, sunscreen and comfortable shoes with grip are ideal — the temple steps are steep.",
       },
