@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { cn } from "../../../lib/cn";
 import { Reveal, RevealItem } from "./Reveal";
+import { RouteMark } from "./RouteMark";
 
 /** Eyebrow + display headline + intro for Home sections, with an optional "see all" link. */
 export function SectionHeading({ id, eyebrow, title, children, link, className, align = "left" }) {
@@ -9,7 +10,7 @@ export function SectionHeading({ id, eyebrow, title, children, link, className, 
     <Reveal stagger className={cn("mb-10 flex flex-col gap-5 sm:mb-12 md:flex-row md:items-end md:justify-between", align === "center" && "items-center text-center md:flex-col md:items-center", className)}>
       <div className={cn("max-w-2xl", align === "center" && "mx-auto")}>
         <RevealItem as="p" className={cn("mb-3 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary-ink", align === "center" && "justify-center")}>
-          <span className="h-px w-8 bg-primary/60" aria-hidden="true" />
+          <RouteMark />
           {eyebrow}
         </RevealItem>
         <RevealItem as="h2" id={id} className="font-display text-[34px] font-semibold leading-[1.05] tracking-[-0.035em] text-balance text-foreground sm:text-5xl">

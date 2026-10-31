@@ -1,26 +1,27 @@
 import { useId } from "react";
 import { cn } from "../../../lib/cn";
 import { formatUsd } from "../../../lib/format";
-import { DURATION_OPTIONS, RATING_OPTIONS } from "../filters";
+import { DURATION_OPTIONS, RATING_OPTIONS, REGION_OPTIONS } from "../filters";
 
 function Group({ title, children }) {
   return (
-    <fieldset className="border-b border-border pb-6 last:border-b-0 last:pb-0">
-      <legend className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-foreground">{title}</legend>
-      {children}
+    <fieldset className="border-t border-border pt-5 first:border-t-0 first:pt-0">
+      <legend className="float-left mb-3 w-full text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">{title}</legend>
+      <div className="clear-both">{children}</div>
     </fieldset>
   );
 }
 
 const optionRow =
-  "flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 text-sm text-foreground transition-colors duration-200 hover:bg-foreground/[0.05] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/50 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-45";
+  "flex cursor-pointer items-center gap-3 rounded-lg px-1.5 py-1 text-sm text-foreground transition-colors duration-200 hover:bg-foreground/[0.05] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/50 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-45";
 
-function CheckList({ options, selected, onChange, name }) {
+function CheckList({ options, selected, onChange, name, heading }) {
   function toggle(id) {
     onChange(selected.includes(id) ? selected.filter((value) => value !== id) : [...selected, id]);
   }
   return (
-    <ul className="space-y-0.5">
+    <ul className="space-y-0.5" aria-label={heading}>
+      {heading && <li aria-hidden="true" className="px-1.5 pb-1 pt-2 text-xs font-medium text-muted first:pt-0">{heading}</li>}
       {options.map((option) => (
         <li key={option.id}>
           <label className={optionRow}>
@@ -107,17 +108,49 @@ function PriceRange({ bounds, min, max, onChange }) {
   );
 }
 
+/** Anywhere / Cambodia / International as a compact segmented control. */
+function RegionSwitch({ value, onChange }) {
+  return (
+    <div className="grid grid-cols-3 gap-1 rounded-full bg-foreground/[0.06] p-1" role="radiogroup" aria-label="Where">
+      {REGION_OPTIONS.map((option) => (
+        <label
+          key={option.value || "any"}
+          className={cn(
+            "cursor-pointer rounded-full px-2 py-1.5 text-center text-xs font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/60",
+            value === option.value ? "bg-surface text-foreground shadow-sm" : "text-muted hover:text-foreground",
+          )}
+        >
+          <input type="radio" name="region" className="sr-only" checked={value === option.value} onChange={() => onChange(option.value)} />
+          {option.value === "international" ? "Abroad" : option.label}
+        </label>
+      ))}
+    </div>
+  );
+}
+
 /** Filters for /tours. Used in the sticky desktop sidebar and inside the mobile drawer. */
 export function FilterPanel({ filters, onChange, destinations, categories, bounds, className }) {
+  const toOption = (item) => ({ id: item.id, name: item.name, count: item.tourCount });
+  const home = destinations.filter((item) => !item.international);
+  const abroad = destinations.filter((item) => item.international);
+  const changeDestination = (destination) => onChange({ destination });
+  // Choosing a region drops destinations from the other one, so the two filters never contradict.
+  const changeRegion = (region) => {
+    const keep = new Set((region === "international" ? abroad : region === "cambodia" ? home : destinations).map((item) => item.id));
+    onChange({ region, destination: filters.destination.filter((id) => keep.has(id)) });
+  };
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn("space-y-5", className)}>
+      <Group title="Where">
+        <RegionSwitch value={filters.region} onChange={changeRegion} />
+      </Group>
       <Group title="Destination">
-        <CheckList
-          name="destination"
-          options={destinations.map((item) => ({ id: item.id, name: item.name, count: item.tourCount }))}
-          selected={filters.destination}
-          onChange={(destination) => onChange({ destination })}
-        />
+        {filters.region !== "international" && (
+          <CheckList name="destination" heading={abroad.length ? "Cambodia" : undefined} options={home.map(toOption)} selected={filters.destination} onChange={changeDestination} />
+        )}
+        {filters.region !== "cambodia" && abroad.length > 0 && (
+          <CheckList name="destination" heading="Beyond Cambodia" options={abroad.map(toOption)} selected={filters.destination} onChange={changeDestination} />
+        )}
       </Group>
       <Group title="Travel style">
         <CheckList

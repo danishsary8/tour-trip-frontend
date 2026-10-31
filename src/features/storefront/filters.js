@@ -1,6 +1,6 @@
 /**
  * /tours filters live in the URL so Home links, the hero search and shared links all work:
- * ?q=&destination=a,b&category=a,b&min=&max=&duration=day|multi&rating=4|4.5&date=&travelers=&sort=
+ * ?q=&region=cambodia|international&destination=a,b&category=a,b&min=&max=&duration=day|multi|long&rating=4|4.5&date=&travelers=&sort=
  */
 
 export const SORT_OPTIONS = [
@@ -13,7 +13,15 @@ export const SORT_OPTIONS = [
 export const DURATION_OPTIONS = [
   { value: "", label: "Any length" },
   { value: "day", label: "Day trips", test: (days) => days <= 1 },
-  { value: "multi", label: "2–3 days", test: (days) => days >= 2 },
+  { value: "multi", label: "2–3 days", test: (days) => days >= 2 && days <= 3 },
+  { value: "long", label: "4 days or more", test: (days) => days >= 4 },
+];
+
+/** Cambodia tours vs International Escapes (tours whose destination is outside Cambodia). */
+export const REGION_OPTIONS = [
+  { value: "", label: "Anywhere" },
+  { value: "cambodia", label: "Cambodia", test: (tour) => !tour.international },
+  { value: "international", label: "International Escapes", test: (tour) => tour.international },
 ];
 
 export const RATING_OPTIONS = [
@@ -35,6 +43,7 @@ export function parseFilters(params) {
   const sort = params.get("sort");
   return {
     q: params.get("q") ?? "",
+    region: REGION_OPTIONS.some((option) => option.value === params.get("region")) ? params.get("region") : "",
     destination: list(params.get("destination")),
     category: list(params.get("category")),
     min: number(params.get("min")),
@@ -59,11 +68,12 @@ export function withFilters(params, changes) {
 }
 
 /** Filter keys that narrow results (date and travellers are informational for daily tours). */
-export const FILTER_KEYS = ["q", "destination", "category", "min", "max", "duration", "rating"];
+export const FILTER_KEYS = ["q", "region", "destination", "category", "min", "max", "duration", "rating"];
 
 export function countActiveFilters(filters) {
   return (
     (filters.q ? 1 : 0) +
+    (filters.region ? 1 : 0) +
     filters.destination.length +
     filters.category.length +
     (filters.min !== null || filters.max !== null ? 1 : 0) +
@@ -81,6 +91,7 @@ export function priceBounds(tours) {
 export function applyFilters(tours, filters) {
   const query = filters.q.trim().toLowerCase();
   const duration = DURATION_OPTIONS.find((option) => option.value === filters.duration)?.test;
+  const region = REGION_OPTIONS.find((option) => option.value === filters.region)?.test;
   const minRating = filters.rating ? Number(filters.rating) : null;
 
   const matchFilter = (selected, id, name) => {
@@ -94,7 +105,8 @@ export function applyFilters(tours, filters) {
 
   const matches = tours.filter(
     (tour) =>
-      (!query || `${tour.name} ${tour.destination} ${tour.category} ${tour.tagline}`.toLowerCase().includes(query)) &&
+      (!query || `${tour.name} ${tour.destination} ${tour.country} ${tour.category} ${tour.tagline}`.toLowerCase().includes(query)) &&
+      (!region || region(tour)) &&
       matchFilter(filters.destination, tour.destinationId, tour.destination) &&
       matchFilter(filters.category, tour.categoryId, tour.category) &&
       (filters.min === null || tour.price >= filters.min) &&

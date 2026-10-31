@@ -25,8 +25,8 @@ export default function DestinationsPage() {
     <>
       <PageIntro
         breadcrumbs={[{ label: "Destinations" }]}
-        eyebrow="Destinations Across Cambodia"
-        title="Six provinces, endless stories"
+        eyebrow="Destinations"
+        title="Six provinces, and three escapes"
         actions={
           catalog.isLoading ? (
             <div className="flex gap-2.5" aria-hidden="true">
@@ -48,10 +48,10 @@ export default function DestinationsPage() {
         }
       >
         From the majestic dawn at Angkor Wat to the tranquil pepper farms of Kampot
-        and the pristine turquoise waters of Koh Rong, discover Cambodia region by region.
+        and the pristine turquoise waters of Koh Rong, discover Cambodia region by region, then three journeys beyond the border.
       </PageIntro>
 
-      <section className="mx-auto max-w-[1320px] px-5 pb-24 lg:px-8" aria-label="Cambodia Destinations">
+      <section className="mx-auto max-w-[1320px] px-5 pb-24 lg:px-8" aria-label="Destinations">
         {catalog.isError ? (
           <EmptyState
             icon={Compass}
@@ -68,13 +68,19 @@ export default function DestinationsPage() {
             ))}
           </div>
         ) : (
+          [
+            { id: "cambodia", title: "Cambodia", items: destinations.filter((item) => !item.international) },
+            { id: "abroad", title: "Beyond Cambodia", items: destinations.filter((item) => item.international) },
+          ].filter((group) => group.items.length).map((group) => (
+          <div key={group.id} className="mt-12 first:mt-0">
+          <h2 className="mb-6 font-display text-2xl font-semibold tracking-tight text-foreground">{group.title}</h2>
           <Reveal
             stagger
             amount={0.08}
             as="ul"
             className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           >
-            {destinations.map((destination) => {
+            {group.items.map((destination) => {
               // Tour count COMPUTED directly by counting matching tours in shared mock catalogue
               const tourCount = tours.filter((t) => t.destinationId === destination.id).length;
               const hasTours = tourCount > 0;
@@ -103,7 +109,7 @@ export default function DestinationsPage() {
                   <div className="relative z-10 flex items-start justify-between p-6">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-md border border-white/10">
                       <MapPin className="size-3 text-accent" aria-hidden="true" />
-                      {destination.province || destination.name}
+                      {destination.international ? destination.country : destination.province || destination.name}
                     </span>
 
                     {hasTours ? (
@@ -120,9 +126,9 @@ export default function DestinationsPage() {
                   {/* Card Content Bottom Details */}
                   <div className="relative z-10 mt-auto flex items-end justify-between gap-4 p-6 sm:p-7 text-white">
                     <div className="min-w-0 flex-1">
-                      <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl text-balance drop-shadow-sm">
+                      <h3 className="font-display text-2xl font-bold tracking-tight sm:text-3xl text-balance drop-shadow-sm">
                         {destination.name}
-                      </h2>
+                      </h3>
                       <p className="mt-2 text-sm text-white/80 line-clamp-2 leading-relaxed">
                         {destination.blurb}
                       </p>
@@ -166,6 +172,8 @@ export default function DestinationsPage() {
               );
             })}
           </Reveal>
+          </div>
+          ))
         )}
       </section>
     </>

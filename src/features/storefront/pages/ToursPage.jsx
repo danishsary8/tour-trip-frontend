@@ -12,7 +12,7 @@ import { FilterPanel } from "../components/FilterPanel";
 import { PageIntro } from "../components/PageIntro";
 import { RecentlyViewed } from "../components/RecentlyViewed";
 import { TourCard, TourCardSkeleton } from "../components/TourCard";
-import { FILTER_KEYS, SORT_OPTIONS, applyFilters, countActiveFilters, parseFilters, priceBounds, withFilters } from "../filters";
+import { DURATION_OPTIONS, FILTER_KEYS, REGION_OPTIONS, SORT_OPTIONS, applyFilters, countActiveFilters, parseFilters, priceBounds, withFilters } from "../filters";
 import { useCatalog } from "../hooks";
 
 const PAGE_SIZE = 6;
@@ -98,6 +98,7 @@ export default function ToursPage() {
   };
   const chips = [
     filters.q && { key: "q", label: `“${filters.q}”`, remove: () => update({ q: "" }) },
+    filters.region && { key: "region", label: REGION_OPTIONS.find((option) => option.value === filters.region).label, remove: () => update({ region: "" }) },
     ...filters.destination.map((id) => ({ key: `d-${id}`, label: nameOf(destinations, id), remove: () => update({ destination: filters.destination.filter((value) => value !== id) }) })),
     ...filters.category.map((id) => ({ key: `c-${id}`, label: nameOf(categories, id), remove: () => update({ category: filters.category.filter((value) => value !== id) }) })),
     (filters.min !== null || filters.max !== null) && {
@@ -105,7 +106,7 @@ export default function ToursPage() {
       label: `${formatUsd(filters.min ?? bounds.min)} – ${formatUsd(filters.max ?? bounds.max)}`,
       remove: () => update({ min: null, max: null }),
     },
-    filters.duration && { key: "duration", label: filters.duration === "day" ? "Day trips" : "2–3 days", remove: () => update({ duration: "" }) },
+    filters.duration && { key: "duration", label: DURATION_OPTIONS.find((option) => option.value === filters.duration).label, remove: () => update({ duration: "" }) },
     filters.rating && { key: "rating", label: `${filters.rating}★ & up`, remove: () => update({ rating: "" }) },
   ].filter(Boolean);
 
@@ -123,9 +124,9 @@ export default function ToursPage() {
 
       <div className="mx-auto grid max-w-[1320px] gap-10 px-5 pb-24 lg:grid-cols-[272px_minmax(0,1fr)] lg:px-8">
         <aside aria-label="Filters" className="hidden lg:block">
-          <div className="sticky top-24 max-h-[calc(100dvh-7rem)] overflow-y-auto rounded-panel border border-border bg-surface p-6 [scrollbar-width:thin]">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="font-display text-lg font-semibold text-foreground">Filters</h2>
+          <div className="sticky top-24 max-h-[calc(100dvh-7rem)] overflow-y-auto pb-6 pr-3 [scrollbar-width:thin]">
+            <div className="mb-5 flex items-center justify-between border-b border-foreground/80 pb-3">
+              <h2 className="text-sm font-semibold text-foreground">Refine</h2>
               {activeCount > 0 && (
                 <button type="button" onClick={clearFilters} className="rounded text-sm font-semibold text-primary-ink outline-none hover:underline focus-visible:ring-2 focus-visible:ring-primary/60">
                   Clear all
