@@ -7,8 +7,7 @@
 import { dashboardDb, toKey, addDays } from "../../mocks/dashboard";
 import { mastersDb } from "../../mocks/masters";
 import { getReviewsDb } from "../../mocks/reviews";
-import angkorGalleryImage from "../../assets/images/trips/angkor-gallery(1).jpg";
-import luxuryAngkorImage from "../../assets/images/common/login_bg_luxury.jpg";
+import { TOUR_PHOTOS } from "../../mocks/tourImages";
 
 /** Marketing copy keyed by tour id; tours without an entry fall back to their Masters description. */
 const TOUR_COPY = {
@@ -129,147 +128,25 @@ export function publicTestimonials(limit = 8) {
     }));
 }
 
-/** General site-wide photo gallery pulling images across all tours and destinations. */
+/** Site-wide gallery: every photo of every active tour (cover first), labelled with where it was taken. */
 export function publicGallery() {
-  const activeTours = mastersDb.tours.filter((tour) => tour.status !== "Inactive");
-  const categories = new Map(mastersDb.categories.map((c) => [c.id, c.name]));
-
-  const galleryItems = [
-    {
-      id: "gal-angkor-sunrise",
-      src: activeTours.find((t) => t.id === "angkor-sunrise")?.image,
-      title: "Dawn at Angkor Wat",
-      caption: "First morning light illuminating the iconic central spires of Angkor Wat.",
-      tourId: "angkor-sunrise",
-      tourName: "Angkor Wat Sunrise Tour",
-      destinationId: "siem-reap",
-      destination: "Siem Reap",
-      categoryId: "temples",
-      category: categories.get("temples") ?? "Temples & Heritage",
-    },
-    {
-      id: "gal-angkor-pond",
-      src: angkorGalleryImage,
-      title: "Lotus Pond Reflection",
-      caption: "Tranquil reflections of the ancient sanctuary mirrored in the temple moat.",
-      tourId: "angkor-sunrise",
-      tourName: "Angkor Wat Sunrise Tour",
-      destinationId: "siem-reap",
-      destination: "Siem Reap",
-      categoryId: "temples",
-      category: categories.get("temples") ?? "Temples & Heritage",
-    },
-    {
-      id: "gal-phnom-penh",
-      src: activeTours.find((t) => t.id === "phnom-penh-city")?.image,
-      title: "Royal Palace Courtyard",
-      caption: "Classic Khmer architecture and golden spires overlooking the riverside promenade.",
-      tourId: "phnom-penh-city",
-      tourName: "Phnom Penh City Tour",
-      destinationId: "phnom-penh",
-      destination: "Phnom Penh",
-      categoryId: "city",
-      category: categories.get("city") ?? "City & Culture",
-    },
-    {
-      id: "gal-koh-rong",
-      src: activeTours.find((t) => t.id === "koh-rong")?.image,
-      title: "Saracen Bay Waters",
-      caption: "Pristine white sand and crystalline waters on Cambodia's southern coast.",
-      tourId: "koh-rong",
-      tourName: "Koh Rong Island",
-      destinationId: "sihanoukville",
-      destination: "Sihanoukville",
-      categoryId: "island",
-      category: categories.get("island") ?? "Island & Beach",
-    },
-    {
-      id: "gal-kampot-river",
-      src: activeTours.find((t) => t.id === "kampot-adventure")?.image,
-      title: "Sunset on the Green River",
-      caption: "Golden hour kayaking along the palm-lined waterways of Kampot province.",
-      tourId: "kampot-adventure",
-      tourName: "Kampot Adventure",
-      destinationId: "kampot",
-      destination: "Kampot",
-      categoryId: "adventure",
-      category: categories.get("adventure") ?? "Adventure & Nature",
-    },
-    {
-      id: "gal-ta-prohm",
-      src: activeTours.find((t) => t.id === "kulen-mountain")?.image,
-      title: "Ta Prohm Roots & Ruins",
-      caption: "Towering ancient trees entwined with temple stone blocks deep in the jungle.",
-      tourId: "kulen-mountain",
-      tourName: "Kulen Mountain Tour",
-      destinationId: "siem-reap",
-      destination: "Siem Reap",
-      categoryId: "adventure",
-      category: categories.get("adventure") ?? "Adventure & Nature",
-    },
-    {
-      id: "gal-bokor-hill",
-      src: activeTours.find((t) => t.id === "bokor-hill")?.image,
-      title: "Bokor Mountain Slopes",
-      caption: "Cool mist rolling over mountain forests with panoramic views to the sea.",
-      tourId: "bokor-hill",
-      tourName: "Bokor Hill Station",
-      destinationId: "kampot",
-      destination: "Kampot",
-      categoryId: "mountain",
-      category: categories.get("mountain") ?? "Mountain & Hill Station",
-    },
-    {
-      id: "gal-tonle-sap",
-      src: activeTours.find((t) => t.id === "tonle-sap-village")?.image,
-      title: "Tonlé Sap Stilted Village",
-      caption: "Centuries-old way of life on Southeast Asia's greatest freshwater lake.",
-      tourId: "tonle-sap-village",
-      tourName: "Tonlé Sap Floating Village",
-      destinationId: "siem-reap",
-      destination: "Siem Reap",
-      categoryId: "city",
-      category: categories.get("city") ?? "City & Culture",
-    },
-    {
-      id: "gal-street-food",
-      src: activeTours.find((t) => t.id === "siem-reap-street-food")?.image,
-      title: "Night Market Street Flavors",
-      caption: "Local delicacies, lemongrass skewers and night market atmosphere in Siem Reap.",
-      tourId: "siem-reap-street-food",
-      tourName: "Siem Reap Street Food Night",
-      destinationId: "siem-reap",
-      destination: "Siem Reap",
-      categoryId: "food",
-      category: categories.get("food") ?? "Food & Markets",
-    },
-    {
-      id: "gal-kep-island",
-      src: activeTours.find((t) => t.id === "kep-rabbit-island")?.image,
-      title: "Rabbit Island Shores",
-      caption: "Quiet coastal island living, crab shacks, and gentle waves in Kep.",
-      tourId: "kep-rabbit-island",
-      tourName: "Kep Crab Market & Rabbit Island",
-      destinationId: "kep",
-      destination: "Kep",
-      categoryId: "island",
-      category: categories.get("island") ?? "Island & Beach",
-    },
-    {
-      id: "gal-angkor-carvings",
-      src: luxuryAngkorImage,
-      title: "Khmer Heritage Sanctuaries",
-      caption: "Sacred architectural lines and timeless stone craftsmanship across Angkor.",
-      tourId: "angkor-sunrise",
-      tourName: "Angkor Wat Sunrise Tour",
-      destinationId: "siem-reap",
-      destination: "Siem Reap",
-      categoryId: "temples",
-      category: categories.get("temples") ?? "Temples & Heritage",
-    },
-  ];
-
-  return galleryItems.filter((item) => Boolean(item.src));
+  const categories = new Map(mastersDb.categories.map((category) => [category.id, category.name]));
+  return mastersDb.tours
+    .filter((tour) => tour.status !== "Inactive")
+    .flatMap((tour) =>
+      (TOUR_PHOTOS[tour.id] ?? []).map((photo, index) => ({
+        id: `gal-${tour.id}-${index}`,
+        src: photo.src,
+        title: photo.title,
+        caption: photo.alt,
+        tourId: tour.id,
+        tourName: tour.name,
+        destinationId: tour.destinationId,
+        destination: tour.destination,
+        categoryId: tour.categoryId,
+        category: categories.get(tour.categoryId) ?? "",
+      })),
+    );
 }
 
 /** Approved reviews across all tours with aggregate rating stats (pending and hidden ones stay private). */

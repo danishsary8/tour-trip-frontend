@@ -1,30 +1,12 @@
-import angkorGallery from "../assets/images/trips/angkor-gallery(1).jpg";
-import taProhm from "../assets/images/common/ta_prohm.jpg";
-import palace from "../assets/images/common/royal_palace.jpg";
-import siemReap from "../assets/images/trips/Arrival & Siem Reap City.jpg";
-import island from "../assets/images/common/koh_rong_island.jpg";
-import river from "../assets/images/common/kampot_river.jpg";
-import sunset from "../assets/images/common/mekong_river_sunset.jpg";
-import tonleSap from "../assets/images/trips/tonle-lake(1).jpg";
+import { TOUR_PHOTOS } from "./tourImages";
 
-/** Only supplemental presentation photographs; the tour itself comes from mastersDb. */
-const EXTRA_PHOTOS = {
-  "angkor-sunrise": [[angkorGallery, "Carved stone detail at Angkor"], [taProhm, "Tree roots winding through a Khmer temple"]],
-  "phnom-penh-city": [[palace, "Royal Palace in Phnom Penh"], [sunset, "A Cambodian river at sunset"]],
-  "koh-rong": [[island, "Palm-lined Cambodian island beach"], [sunset, "Golden hour over Cambodian water"]],
-  "kampot-adventure": [[river, "Green riverside landscape in Kampot"], [sunset, "Cambodian river at golden hour"]],
-  "kulen-mountain": [[taProhm, "Ancient Khmer stone and forest"], [angkorGallery, "Khmer temple carving"]],
-  "bokor-hill": [[river, "Misty green Cambodian hills"], [sunset, "Cambodian mountain horizon at dusk"]],
-  "tonle-sap-village": [[tonleSap, "Tonlé Sap lake and waterside homes"], [siemReap, "Siem Reap cityscape"]],
-  "siem-reap-street-food": [[siemReap, "Siem Reap street scene"], [angkorGallery, "Khmer cultural detail"]],
-  "kep-rabbit-island": [[island, "Cambodian island shoreline"], [river, "Lush Cambodian landscape"]],
-  "battambang-countryside": [[river, "Cambodian rural river landscape"], [sunset, "Cambodian countryside at golden hour"]],
-};
-
+/** The tour's photos for the detail gallery: cover first, then the rest of its set in `tourImages.js`. */
 export function tourPhotos(tour) {
   const primary = { src: tour.coverImage ?? tour.image, alt: `${tour.name} in ${tour.destination}` };
-  const extras = (EXTRA_PHOTOS[tour.id] ?? []).filter(([src]) => src !== primary.src).map(([src, alt]) => ({ src, alt }));
-  return [primary, ...extras];
+  const set = (TOUR_PHOTOS[tour.id] ?? []).map(({ src, alt }) => ({ src, alt }));
+  // The cover's own entry carries a better description than the generic fallback.
+  const coverEntry = set.find((item) => item.src === primary.src);
+  return [coverEntry ?? primary, ...set.filter((item) => item.src !== primary.src)];
 }
 
 /** Editorial copy only. Core tour fields, guide, reviews and availability stay in their shared stores. */

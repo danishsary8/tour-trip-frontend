@@ -7,15 +7,7 @@
  * compare against. The last 30 days hold roughly 120 bookings, the operational set
  * used by the tables and actions.
  */
-import angkorImage from "../assets/images/trips/Angkor-Wat(1).jpg";
-import kampotImage from "../assets/images/common/mekong_river_sunset.jpg";
-import phnomPenhImage from "../assets/images/common/royal_palace.jpg";
-import kulenImage from "../assets/images/common/ta_prohm.jpg";
-import kohRongImage from "../assets/images/common/koh_rong_island.jpg";
-import bokorImage from "../assets/images/common/kampot_river.jpg";
-import tonleSapImage from "../assets/images/trips/tonle-lake(1).jpg";
-import streetFoodImage from "../assets/images/trips/Arrival & Siem Reap City.jpg";
-import kepImage from "../assets/images/common/bg_login.jpg";
+import { coverOf } from "./tourImages";
 import { MOCK_KEYS, onStoredChange, readJson, writeJson } from "./persistence";
 
 /* ------------------------------------------------------------------ utils */
@@ -135,17 +127,17 @@ export const GUIDES = [
 ].map((guide) => ({ ...guide, initials: initialsOf(guide.name) }));
 
 export const TOURS = [
-  { id: "angkor-sunrise", name: "Angkor Wat Sunrise Tour", destinationId: "siem-reap", categoryId: "temples", price: 85, capacity: 20, guideId: "g-sokha", image: angkorImage, weight: 30 },
-  { id: "phnom-penh-city", name: "Phnom Penh City Tour", destinationId: "phnom-penh", categoryId: "city", price: 45, capacity: 24, guideId: "g-dara", image: phnomPenhImage, weight: 21 },
-  { id: "koh-rong", name: "Koh Rong Island", destinationId: "sihanoukville", categoryId: "island", price: 160, capacity: 18, guideId: "g-vanna", image: kohRongImage, weight: 15 },
-  { id: "kampot-adventure", name: "Kampot Adventure", destinationId: "kampot", categoryId: "adventure", price: 120, capacity: 16, guideId: "g-sreyleak", image: kampotImage, weight: 13 },
-  { id: "kulen-mountain", name: "Kulen Mountain Tour", destinationId: "siem-reap", categoryId: "adventure", price: 95, capacity: 14, guideId: "g-piseth", image: kulenImage, weight: 12 },
-  { id: "bokor-hill", name: "Bokor Hill Station", destinationId: "kampot", categoryId: "mountain", price: 70, capacity: 18, guideId: "g-chenda", image: bokorImage, weight: 9 },
+  { id: "angkor-sunrise", name: "Angkor Wat Sunrise Tour", destinationId: "siem-reap", categoryId: "temples", price: 85, capacity: 20, guideId: "g-sokha", image: coverOf("angkor-sunrise"), weight: 30 },
+  { id: "phnom-penh-city", name: "Phnom Penh City Tour", destinationId: "phnom-penh", categoryId: "city", price: 45, capacity: 24, guideId: "g-dara", image: coverOf("phnom-penh-city"), weight: 21 },
+  { id: "koh-rong", name: "Koh Rong Island", destinationId: "sihanoukville", categoryId: "island", price: 160, capacity: 18, guideId: "g-vanna", image: coverOf("koh-rong"), weight: 15 },
+  { id: "kampot-adventure", name: "Kampot Adventure", destinationId: "kampot", categoryId: "adventure", price: 120, capacity: 16, guideId: "g-sreyleak", image: coverOf("kampot-adventure"), weight: 13 },
+  { id: "kulen-mountain", name: "Kulen Mountain Tour", destinationId: "siem-reap", categoryId: "adventure", price: 95, capacity: 14, guideId: "g-piseth", image: coverOf("kulen-mountain"), weight: 12 },
+  { id: "bokor-hill", name: "Bokor Hill Station", destinationId: "kampot", categoryId: "mountain", price: 70, capacity: 18, guideId: "g-chenda", image: coverOf("bokor-hill"), weight: 9 },
   // Added with the storefront (Phase 7). Bookings pick tours with one draw, so volumes are unchanged.
-  { id: "tonle-sap-village", name: "Tonlé Sap Floating Village", destinationId: "siem-reap", categoryId: "city", price: 55, capacity: 16, guideId: "g-vanna", image: tonleSapImage, weight: 7 },
-  { id: "siem-reap-street-food", name: "Siem Reap Street Food Night", destinationId: "siem-reap", categoryId: "food", price: 35, capacity: 12, guideId: "g-dara", image: streetFoodImage, weight: 6 },
-  { id: "kep-rabbit-island", name: "Kep Crab Market & Rabbit Island", destinationId: "kep", categoryId: "island", price: 75, capacity: 16, guideId: "g-sreyleak", image: kepImage, weight: 5 },
-  { id: "battambang-countryside", name: "Battambang Countryside & Bamboo Train", destinationId: "battambang", categoryId: "adventure", price: 65, capacity: 16, guideId: "g-chenda", image: bokorImage, weight: 4 },
+  { id: "tonle-sap-village", name: "Tonlé Sap Floating Village", destinationId: "siem-reap", categoryId: "city", price: 55, capacity: 16, guideId: "g-vanna", image: coverOf("tonle-sap-village"), weight: 7 },
+  { id: "siem-reap-street-food", name: "Siem Reap Street Food Night", destinationId: "siem-reap", categoryId: "food", price: 35, capacity: 12, guideId: "g-dara", image: coverOf("siem-reap-street-food"), weight: 6 },
+  { id: "kep-rabbit-island", name: "Kep Crab Market & Rabbit Island", destinationId: "kep", categoryId: "island", price: 75, capacity: 16, guideId: "g-sreyleak", image: coverOf("kep-rabbit-island"), weight: 5 },
+  { id: "battambang-countryside", name: "Battambang Countryside & Bamboo Train", destinationId: "battambang", categoryId: "adventure", price: 65, capacity: 16, guideId: "g-chenda", image: coverOf("battambang-countryside"), weight: 4 },
 ].map((tour) => ({ ...tour, destination: DESTINATIONS.find((item) => item.id === tour.destinationId).name }));
 
 const CUSTOMER_NAMES = [
