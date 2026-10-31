@@ -59,7 +59,7 @@ export function FeaturedToursSection({ tours, loading }) {
       <SectionHeading id="home-featured" eyebrow="Traveller favourites" title="Featured tours" link={{ to: "/tours?sort=popular", label: "See every tour" }}>
         The journeys our guests book most, each led by a guide who grew up nearby.
       </SectionHeading>
-      <Reveal stagger as="ul" amount={0.1} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+      <Reveal stagger as="ul" amount={0.1} className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8">
         {loading
           ? Array.from({ length: 6 }, (_, index) => (
               <li key={index}>
